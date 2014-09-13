@@ -583,6 +583,7 @@ var manifest = [
     {src:"audio/moralMathPositive2.wav", id:"Pos2"},
     {src:"audio/moralMathNegative1.wav", id:"Neg1"},
     {src:"audio/moralMathNegative2.wav", id:"Neg2"},
+    {src:"audio/PencilsDownYoung.wav", id:"PencilsDown"},
     {src:"images/buttons.png", id:"button"},
     {src:"images/miniButtons.png", id:"miniButton"},
     {src:"images/SpeakerOn.png", id:"SpeakerOn"},
@@ -1042,6 +1043,9 @@ var Stats = (function(){
         // roll score as average
         ret.score = (this.score * this.numOfTests + that.score * that.numOfTests)  / ret.numOfTests; // ret numof tests should already be set
     };
+    Stats.prototype.numOfQuestions = function() {
+        return this.correctAnswers + this.incorrectAnswers;
+    };
     Stats.prototype.getScore = function() {
         return round(this.score , 3) * 100;
     };
@@ -1163,14 +1167,12 @@ var MathTest = (function(){
     MathTest.prototype.generate = function() {
         this.caughtCheating = false;
         this.questions = [];
-        this.stats.cheatCount = 0; // IMPORTANT: this will need to be updated during game play
+        this.stats.cheatCount = 0;
         for(var i=0;i<this.numOfQuestions;i++) {
             var operation = RandomElement(this.listOfOperations);
             var pair = operation.generatePair(this.rangeLow,this.rangeHigh);
             this.questions.push(new Question(pair.a,pair.b,operation));
         }
-        //this.highestAnswer = Max(this.questions,function(a) { return a.correctAnswer; });
-        //this.lowestAnswer  = Min(this.questions,function(a) { return a.correctAnswer; });
     };
     //should be run after test is complete
     MathTest.prototype.updateStats = function() {
@@ -1283,6 +1285,14 @@ var lastTest = null;
 
 var difficulty = StockTests.length-1;
 
+var moodyMusic = [
+    "Pos2", // really good
+    "Pos1",
+    "GamePlay",
+    "Neg1",
+    "Neg2", // really bad
+];
+
 var questions = {
     questions: [],
     currentQuestionIndex: 0,
@@ -1302,7 +1312,7 @@ var questions = {
 
 function initGameScene(container) {
     
-    var timer = new CountDownTimer(2*60); // you have 1 minutes
+    var timer = new CountDownTimer(2*60);
     var test;
     
     var funnyResponces =  [
@@ -1360,8 +1370,31 @@ function initGameScene(container) {
     teacher.scaleY = 0.75;
     container.addChild(teacher);
     
+    
+    function Choice(x,y) {
+        this.text = new createjs.Text("option","bold italic 35px Rage", "#999");
+        this.box = new createjs.Shape();
+        this.pos = new Vec2(x,y);
+        
+        this.update = function() {
+            copyXY(this.text,this.pos);
+            copyXY(this.box, this.pos);
+        };
+        
+        this.box.graphics.beginFill("#F00").drawRect(0,0, 60, 40);
+        container.addChild(this.box);
+    }
+    
+    var options = [];
+    
+    
+    
+    
+    
     GameStates.Game.enable = function() {
-        backgroundMusic.setSoundFromString("GamePlay",true);
+        var musicIndex = Math.floor(globalStats.numOfQuestions() > 0 ? clamp((globalStats.cheatCount / globalStats.numOfQuestions())*moodyMusic.length,0,moodyMusic.length-1) : moodyMusic.length / 2);
+        
+        backgroundMusic.setSoundFromString(moodyMusic[musicIndex],true);
         //generate test
         questionsCheatedOn = new HashSet();
         test = StockTests[difficulty];
@@ -1379,10 +1412,6 @@ function initGameScene(container) {
         
         timer.start();
     };
-    
-    GameStates.Game.mouseDownEvent = function(){ };
-    
-    GameStates.Game.mouseUpEvent = function(){ };
     
     GameStates.Game.update = function() {
         if(cheating>=0) {
@@ -1426,11 +1455,11 @@ function initGameScene(container) {
     function gameComplete(cheated) {
         timer.stop();
         if(!cheated) {
-            //play audio
+            createjs.Sound.play("PencilsDown");
         }
         test.updateStats();
         test.stats.cheatCount += questionsCheatedOn.size();
-        //test.stats.points = ??? // do something
+        //test.stats.points = ??? //update do something
         
         //fade screen
         //gen stats
