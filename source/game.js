@@ -1365,6 +1365,9 @@ function Cell(pos) {
     this.item = null;
     this.pos = pos;
 }
+var globalStats = new Stats();
+
+var lastTest = null;
 
 function Query(valid) {
     this.levelBoost = 0;
