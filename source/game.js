@@ -434,61 +434,21 @@ var manifest = [
     {src:"audio/Loading.mp3", id:"Loading"},
     {src:"images/Static/Title.png", id:"title"},
     {src:"images/Static/locker.png", id:"locker"}, // asdfadsf
-    {src:"images/Static/LevelSelection.png", id:"levelSelect"},
-    {src:"images/Static/PauseMenu.png", id:"pauseMenu"},
+    {src:"images/Static/GameScene.png", id:"GameScene"}, // asdfadsf
     {src:"images/Static/Instructions.png", id:"instructions"},
-    {src:"images/Static/GameOverPurplePlanet.png", id:"purGameover"},
-    {src:"images/Static/GameOverBluePlanet.png", id:"bluGameover"},
-    {src:"images/Static/WinPurplePlanet.png", id:"purWin"},
-    {src:"images/Static/WinBluePlanet.png", id:"bluWin"},
+    {src:"images/Static/GameOver.png", id:"bluGameover"},
     {src:"images/Static/Credits.png", id:"credits"},
-    {src:"images/Terrain/BackgroundBasePurple.png", id:"purBackground"},
-    {src:"images/Terrain/BackgroundBaseBlue.png", id:"bluBackground"},
-    {src:"images/Terrain/pathOpenPurple.png", id:"purPath"},
-    {src:"images/Terrain/pathOpenBlue.png", id:"bluPath"},
     {src:"audio/GameOver.mp3", id:"Failure"},
     {src:"audio/GamePlay.mp3", id:"GamePlay"},
-    {src:"images/Static/purpleRockBlock.png", id:"purRock"},
-    {src:"images/Static/blueRockBlock.png", id:"bluRock"},
-    {src:"images/Static/purpleTreeBlock.png", id:"purTree"},
-    {src:"images/Static/blueTreeBlock.png", id:"bluTree"},
     {src:"images/buttons.png", id:"button"},
     {src:"images/miniButtons.png", id:"miniButton"},
-    {src:"images/levelSelectionButtons.png", id:"levelButton"},
     {src:"images/SpeakerOn.png", id:"SpeakerOn"},
-    {src:"audio/StartScreen.mp3", id:"StartScreen"},
     {src:"images/SpeakerOff.png", id:"SpeakerOff"},
     {src:"audio/TinyTick.mp3", id:"tinyTick"},
     {src:"audio/Tick.mp3", id:"tick"},
     {src:"audio/Kaching.mp3", id:"kaching"},
-    {src:"audio/KaBang.mp3", id:"kabang"},
     {src:"audio/Fizzle.mp3", id:"fizzle"},
-    {src:"audio/Monster.mp3", id:"monster"},
-    {src:"audio/Fire.mp3", id:"fire"},
-    {src:"audio/Creep.mp3", id:"creep"},
-    {src:"audio/Wave.mp3", id:"wave"},
     {src:"audio/ForJamie.mp3", id:"Friday"},
-    {src:"images/stars.png", id:"Stars"},
-    {src:"images/Hazard/jamieBlock.png", id:"jamie"},
-    {src:"images/Hazard/LightningBolt.png", id:"bolt"},
-    {src:"images/Hazard/tsunamiBlock.png", id:"tsunami"},
-    {src:"images/Hazard/mantisBlock.png", id:"mantis"},
-    {src:"images/Hazard/fireBlock.png", id:"fire"},
-    {src:"images/Hazard/monsterBlock.png", id:"creeper"},
-    {src:"images/Hazard/tsunamiSpawner.png", id:"tsunamiSpawn"},
-    {src:"images/Hazard/mantisSpawner.png", id:"mantisSpawn"},
-    {src:"images/Hazard/fireSpawner.png", id:"fireSpawn"},
-    {src:"images/Hazard/monsterSpawner.png", id:"creeperSpawn"},
-    {src:"images/Population/purplePop1.png", id:"purPop1"},
-    {src:"images/Population/purplePop2.png", id:"purPop2"},
-    {src:"images/Population/purplePop3.png", id:"purPop3"},
-    {src:"images/Population/purplePop4.png", id:"purPop4"},
-    {src:"images/Population/purplePop5.png", id:"purPop5"},
-    {src:"images/Population/bluePop1.png", id:"bluPop1"},
-    {src:"images/Population/bluePop2.png", id:"bluPop2"},
-    {src:"images/Population/bluePop3.png", id:"bluPop3"},
-    {src:"images/Population/bluePop4.png", id:"bluPop4"},
-    {src:"images/Population/bluePop5.png", id:"bluPop5"},
 ];
 
 var queue;
@@ -553,12 +513,6 @@ var spriteSheets = {
     },
     makeMiniButton: function() {
         return (new createjs.Sprite(this.miniButtons));
-    },
-    makeLevelButton: function() {
-        return (new createjs.Sprite(this.levelButtons));
-    },
-    makeStar: function() {
-        return (new createjs.Sprite(this.stars));
     },
     mainCharacter: null
 };
@@ -678,43 +632,6 @@ function initSprites() {
         } 
     });
     spriteSheets.miniButtons = miniButtonSheet;
-    
-    var levelButtonSheet = new createjs.SpriteSheet({
-        images: [queue.getResult("levelButton")],
-        frames: {width: 117, height: 117, regX: 58, regY: 58},
-        animations: {
-        level1Up:   [0, 0,   "level1Up"],
-        level1Over: [1, 1,   "level1Over"],
-        level1Down: [2, 2,   "level1Down"],
-        level2Up:   [3, 3,   "level2Up"],
-        level2Over: [4, 4,   "level2Over"],
-        level2Down: [5, 5,   "level2Down"],
-        level3Up:   [6, 6,   "level3Up"],
-        level3Over: [7, 7,   "level3Over"],
-        level3Down: [8, 8,   "level3Down"],
-        level4Up:   [9, 9,   "level4Up"],
-        level4Over: [10, 10, "level4Over"],
-        level4Down: [11, 11, "level4Down"],
-        level5Up:   [12, 12, "level5Up"],
-        level5Over: [13, 13, "level5Over"],
-        level5Down: [14, 14, "level5Down"],
-        } 
-    });
-    spriteSheets.levelButtons = levelButtonSheet;
-    //This takes the images loaded from the sprite sheet and breaks it into the individual frames. I cut and pasted the 'frames' parameter from the .js file created by Flash when I exported in easelJS format. I didn't cut and paste anything except 'frames' because I am using preloadJS to load all the images completely before running the game. That's what the queue.getResult is all about.
-    
-    var starSheet = new createjs.SpriteSheet({
-        images: [queue.getResult("Stars")],
-        frames: {width: 128, height: 128, regX: 64, regY: 64},
-        animations: {
-        empty:   [0, 0, "empty"],
-        quarter: [1, 1, "quarter"],
-        half: [2, 2, "half"],
-        quarter3:   [3, 3, "quarter3"],
-        full: [4, 4, "full"],
-        } 
-    });
-    spriteSheets.stars = starSheet;
 }
 
 //endregion
