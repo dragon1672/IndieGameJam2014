@@ -115,14 +115,14 @@ var FPS = 30;
             
             var allPoints = new HashSet();
             if(points instanceof Array) {
-                points.addAll(points);
+                allPoints.addAll(points);
             } else {
-                points.add(points);
+                allPoints.add(points);
             }
             if(set2 instanceof Array) {
-                set2.addAll(points);
+                allPoints.addAll(set2);
             } else {
-                points.add(set2);
+                allPoints.add(set2);
             }
             
             
