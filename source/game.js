@@ -57,6 +57,7 @@ var FPS = 30;
         function HashTable() {
             this.pairs = [];
             this.numOfActiveIterations = 0;
+            this._size = 0;
         }
         function KeyValuePair(hash, key, val) {
             this.hash = hash;
@@ -77,6 +78,7 @@ var FPS = 30;
             var hash = this.hashObject(newKey);
             if (!this.containsKey(newKey)) {
                 this.pairs[hash] = new KeyValuePair(hash, newKey, newVal);
+                this._size++;
             } else {
                 this.pairs[hash].val = newVal;
             }
@@ -93,6 +95,7 @@ var FPS = 30;
                 hash = this.hashObject(key);
                 this.pairs[hash].markedForDel = true;
                 delete this.pairs[hash];
+                this._size--;
             }
         };
         HashTable.prototype.containsKey = function (key) {
@@ -108,9 +111,7 @@ var FPS = 30;
         };
         HashTable.prototype.isEmpty = function () { return this.size() === 0; };
         HashTable.prototype.size = function () {
-            var ret = 0;
-            this.map(function() {ret++;});
-            return ret;
+            return this._size;
         };
         //pass in function(key,val)
         HashTable.prototype.foreachInSet = function (theirFunction) {
