@@ -281,7 +281,7 @@ var FPS = 30;
         };
         EventTimer.prototype.stop = function() {
             clearInterval(this._updateHandle);
-            this.timer.stop();
+            return this.timer.stop();
         };
         
         return EventTimer;
@@ -318,6 +318,10 @@ var FPS = 30;
             this.timer.start();
         };
         CountDownTimer.prototype.reset = CountDownTimer.prototype.start;
+        CountDownTimer.prototype.stop = function() {
+            this.timer.stop();
+            return this.time;
+        };
         return CountDownTimer;
     }());
     //endregion
@@ -961,18 +965,20 @@ var Stats = (function(){
         this.incorrectAnswers = 0;
         this.timesCaught = 0;
         this.numOfTests = 0;
+        this.leftOverTime = 0;
         this.stickersBought = 0;
         this.score = 0;
     }
     
     Stats.prototype.add = function(that) {
         var ret = new Stats();
-        ret.cheatCount       += that.cheatCount      ;
-        ret.correctAnswers   += that.correctAnswers  ;
-        ret.incorrectAnswers += that.incorrectAnswers;
-        ret.timesCaught      += that.timesCaught     ;
-        ret.numOfTests       += that.numOfTests      ;
-        ret.stickersBought   += that.stickersBought  ;
+        ret.cheatCount       = this.cheatCount       + that.cheatCount      ;
+        ret.correctAnswers   = this.correctAnswers   + that.correctAnswers  ;
+        ret.incorrectAnswers = this.incorrectAnswers + that.incorrectAnswers;
+        ret.timesCaught      = this.timesCaught      + that.timesCaught     ;
+        ret.numOfTests       = this.numOfTests       + that.numOfTests      ;
+        ret.leftOverTime     = this.leftOverTime     + that.leftOverTime    ;
+        ret.stickersBought   = this.stickersBought   + that.stickersBought  ;
         // roll score as average
         ret.score = (this.score * this.numOfTests + that.score * that.numOfTests)  / ret.numOfTests; // ret numof tests should already be set
     };
@@ -1191,7 +1197,10 @@ function initGameScene(container) {
     
     GameStates.Game.enable = function() {
         backgroundMusic.setSoundFromString("GamePlay",true);
+        //generate test
+        //display teset
         
+        timer.start();
     };
     
     GameStates.Game.mouseDownEvent = function(e){
@@ -1208,8 +1217,17 @@ function initGameScene(container) {
     };
     
     GameStates.Game.disable = function() {
-        
+        timer.stop();
     };
+    
+    function gameComplete() {
+        timer.stop();
+        //play audio
+        //fade screen
+        //gen stats
+    }
+    
+    timer.timeCompleteEvent.addCallBack(gameComplete);
 }
 function initLocker(container) {
     var validStickers = new HashSet();
