@@ -47,105 +47,6 @@ var FPS = 30;
 //endregion
 
 //region Classes
-    var Timer = (function(){
-        function Timer() {
-            this.gameTimer = 0;
-            this.frameCount = 0;
-        }
-        Timer.prototype.update = function(FPS) {
-            this.frameCount = Math.max(0,this.frameCount+1);
-            // lets make this only count 1/10s of a second
-            if(this.frameCount%(FPS/10) === 0) {
-                this.gameTimer = this.frameCount/(FPS);   
-            }
-        };
-        Timer.prototype.reset = function() {
-            this.frameCount = 0;
-            this.gameTimer = 0;
-        };
-        Timer.prototype.addSeconds = function(seconds, FPS) {
-            this.frameCount += seconds * FPS;
-        };
-        return Timer;
-    }());
-    
-    var Vec2, Coord;
-    Vec2 = Coord = (function(){
-        function Coord(x,y) {
-            if(x===undefined) {
-                this.x = 0;
-                this.y = 0;
-            } else if(y === undefined) {
-                this.x = x.x;
-                this.y = x.y;
-            } else {
-                this.x = x;
-                this.y = y;
-            }
-        }
-        Coord.prototype.isEqual  = function(that) { return this.x === that.x && this.y === that.y; };
-        Coord.prototype.toString = function() { return "{"+this.x+","+this.y+"}"; };
-        Coord.prototype.clone    = function() { return new Coord(this); };
-        //math
-        Coord.prototype.add = function(that)     { return new Coord(this.x+that.x,this.y+that.y); };
-        Coord.prototype.sub = function(that)     { return new Coord(this.x-that.x,this.y-that.y); };
-        Coord.prototype.mul = function(constent) { return new Coord(constent * this.x,constent * this.y); };
-        Coord.prototype.div = function(constent) { return this.mul(1/constent); };
-        Coord.prototype.dot = function(that)     { return this.x * that.x + this.y * that.y; };
-        Coord.prototype.lengthSquared = function() { return this.dot(this); };
-        Coord.prototype.length     = function()    { return Math.sqrt(this.lengthSquared(this)); };
-        Coord.prototype.normalized = function()    { return new Coord(this.x,this.y).div(Math.sqrt(this.lengthSquared(this))); };
-        Coord.prototype.perpCW     = function()    { return new Coord(-this.y,this.x); };
-        Coord.prototype.perpCCW    = function()    { return new Coord(this.y,-this.x); };
-        Coord.prototype.LERP       = function(percent, that) { return this.mul(1-percent).add(that.mul(percent)); };
-        Coord.prototype.cross      = function(that) { return this.x * that.y - this.y * that.x; };
-        Coord.prototype.projection = function(norm) { return (this.dot(norm).mul(norm)).div(norm.lengthSquared()); };
-        Coord.prototype.rejection  = function(norm) { return this.sub(this.projection(norm)); };
-        Coord.prototype.isZero     = function()     { return this.x === 0 && this.y === 0;};
-        Coord.prototype.withinBox  = function(exclusiveBounds) { return this.x >= 0 && this.y >= 0 && this.x < exclusiveBounds.x && this.y < exclusiveBounds.y; };
-        Coord.prototype.wrapByBox  = function(exclusiveBounds) { return new Coord(this.x % exclusiveBounds.x + (this.x < 0 ? exclusiveBounds.x-1 : 0) , this.y % exclusiveBounds.y + (this.y < 0 ? exclusiveBounds.y-1 : 0)); };
-        Coord.prototype.floor      = function()     { return new Coord(Math.floor(this.x),Math.floor(this.y)); };
-        return Coord;
-    }());
-    
-    var Bounds = (function(){
-        function Bounds(points,set2) {
-            points = points || new Coord(0,0);
-            set2 = set2 || new Coord(1,1);
-            
-            var allPoints = new HashSet();
-            if(points instanceof Array) {
-                allPoints.addAll(points);
-            } else {
-                allPoints.add(points);
-            }
-            if(set2 instanceof Array) {
-                allPoints.addAll(set2);
-            } else {
-                allPoints.add(set2);
-            }
-            
-            
-            this.start = new Coord(null,null);
-            this.end = new Coord(null,null);
-            var instance = this;
-            allPoints.map(function(item) {
-                console.log(item);
-                instance.start.x = instance.start.x === null ? item.x : Math.min(instance.start.x,item.x);
-                instance.start.y = instance.start.y === null ? item.y : Math.min(instance.start.y,item.y);
-                instance.end.x   = instance.end.x   === null ? item.x : Math.max(instance.end.x,item.x);
-                instance.end.y   = instance.end.y   === null ? item.y : Math.max(instance.end.y,item.y);
-            });
-        }
-        Bounds.prototype.withinBounds = function(pos) {
-            var zeroBased = pos.sub(this.start);
-            var offset = this.end.sub(this.start);
-            return pos.withinBox(offset);
-        };
-        
-        return Bounds;
-    }());
-    
     //region hashy
 
     /*
@@ -300,6 +201,199 @@ var FPS = 30;
     })();
 
     //endregion
+    var GameEvent = (function(){
+        function GameEvent() {
+            this.calls = new HashSet();
+        }
+        GameEvent.prototype.callAll = function(a,b,c,d,e,f,g) {
+            this.calls.foreachInSet(function(item) { item(a,b,c,d,e,f,g); });
+        };
+        GameEvent.prototype.addCallBack = function(toAdd) {
+            this.calls.add(toAdd);
+        };
+        GameEvent.prototype.removeCallBack = function (toKill) {
+            this.calls.remove(toKill);
+        };
+        return GameEvent;
+    }());
+    
+    //region timers (requires hash and event)
+    var StopWatch = (function(){
+        function StopWatch() {
+            this.gameTimer = 0;
+            this.frameCount = 0;
+        }
+        StopWatch.prototype.update = function(FPS) {
+            this.frameCount = Math.max(0,this.frameCount+1);
+            // lets make this only count 1/10s of a second
+            if(this.frameCount%(FPS/10) === 0) {
+                this.gameTimer = this.frameCount/(FPS);   
+            }
+        };
+        StopWatch.prototype.reset = function() {
+            this.frameCount = 0;
+            this.gameTimer = 0;
+        };
+        StopWatch.prototype.addSeconds = function(seconds, FPS) {
+            this.frameCount += seconds * FPS;
+        };
+        return StopWatch;
+    }());
+    var Timer = (function(){
+        function Timer() {
+            this.startTime = 0;
+            this.endTime = 0;
+            this.lastInterval = 0;
+        }
+        Timer.prototype.start = function() {
+            this.startTime = Date.now();
+            this.lastInterval = this.startTime;
+        };
+        Timer.prototype.stop = function() {
+            this.endTime = Date.now();
+            return (this.endTime - this.startTime) / 1000;
+        };
+        Timer.prototype.interval = function() {
+            var current = Date.now();
+            var ret = (current - this.lastInterval) / 1000;
+            this.lastInterval = current;
+            return ret;
+        };
+        return Timer;
+    }());
+    var EventTimer = (function(){
+        function EventTimer(targetFPS) {
+            this.targetFPS = targetFPS || 30;
+            this.timer = new Timer();
+            this._updateHandle = null;
+            //function(dt)
+            this.updateEvent = new GameEvent();
+        }
+        EventTimer.prototype.update = function() {
+            var dt = this.timer.interval();
+            this.updateEvent.callAll(dt);
+        };
+        EventTimer.prototype.start = function() {
+            this.timer.start();
+            var instance = this;
+            this._updateHandle = setInterval(function() {instance.update();},1/this.targetFPS * 1000);
+        };
+        EventTimer.prototype.stop = function() {
+            clearInterval(this._updateHandle);
+            this.timer.stop();
+        };
+        
+        return EventTimer;
+    }());
+    var CountDownTimer = (function() {
+        function CountDownTimer(time,loop) {
+            this.time = time;
+            this.timer = new EventTimer(30);
+            var instance = this;
+            this.timer.updateEvent.addCallBack(function(dt) {instance.update(dt);});
+            this.loop = loop;
+            
+            //events
+            //function(timer)
+            this.timeCompleteEvent = new GameEvent();
+            //function(timer)
+            this.timeResetEvent = new GameEvent();
+        }
+        CountDownTimer.prototype.update = function(dt) {
+            this.time -= dt;
+            if(this.time < 0) {
+                this.timeCompleteEvent.callAll(this);
+                if(this.loop) {
+                    this.time += this.startTime;
+                    this.timeResetEvent.callAll(this);
+                } else {
+                    this.timer.stop();
+                }
+            }
+        };
+        CountDownTimer.prototype.start = function() {
+            this.timer.start();
+        };
+        return CountDownTimer;
+    }());
+    //endregion
+    
+    var Vec2, Coord;
+    Vec2 = Coord = (function(){
+        function Coord(x,y) {
+            if(x===undefined) {
+                this.x = 0;
+                this.y = 0;
+            } else if(y === undefined) {
+                this.x = x.x;
+                this.y = x.y;
+            } else {
+                this.x = x;
+                this.y = y;
+            }
+        }
+        Coord.prototype.isEqual  = function(that) { return this.x === that.x && this.y === that.y; };
+        Coord.prototype.toString = function() { return "{"+this.x+","+this.y+"}"; };
+        Coord.prototype.clone    = function() { return new Coord(this); };
+        //math
+        Coord.prototype.add = function(that)     { return new Coord(this.x+that.x,this.y+that.y); };
+        Coord.prototype.sub = function(that)     { return new Coord(this.x-that.x,this.y-that.y); };
+        Coord.prototype.mul = function(constent) { return new Coord(constent * this.x,constent * this.y); };
+        Coord.prototype.div = function(constent) { return this.mul(1/constent); };
+        Coord.prototype.dot = function(that)     { return this.x * that.x + this.y * that.y; };
+        Coord.prototype.lengthSquared = function() { return this.dot(this); };
+        Coord.prototype.length     = function()    { return Math.sqrt(this.lengthSquared(this)); };
+        Coord.prototype.normalized = function()    { return new Coord(this.x,this.y).div(Math.sqrt(this.lengthSquared(this))); };
+        Coord.prototype.perpCW     = function()    { return new Coord(-this.y,this.x); };
+        Coord.prototype.perpCCW    = function()    { return new Coord(this.y,-this.x); };
+        Coord.prototype.LERP       = function(percent, that) { return this.mul(1-percent).add(that.mul(percent)); };
+        Coord.prototype.cross      = function(that) { return this.x * that.y - this.y * that.x; };
+        Coord.prototype.projection = function(norm) { return (this.dot(norm).mul(norm)).div(norm.lengthSquared()); };
+        Coord.prototype.rejection  = function(norm) { return this.sub(this.projection(norm)); };
+        Coord.prototype.isZero     = function()     { return this.x === 0 && this.y === 0;};
+        Coord.prototype.withinBox  = function(exclusiveBounds) { return this.x >= 0 && this.y >= 0 && this.x < exclusiveBounds.x && this.y < exclusiveBounds.y; };
+        Coord.prototype.wrapByBox  = function(exclusiveBounds) { return new Coord(this.x % exclusiveBounds.x + (this.x < 0 ? exclusiveBounds.x-1 : 0) , this.y % exclusiveBounds.y + (this.y < 0 ? exclusiveBounds.y-1 : 0)); };
+        Coord.prototype.floor      = function()     { return new Coord(Math.floor(this.x),Math.floor(this.y)); };
+        return Coord;
+    }());
+    
+    var Bounds = (function(){
+        function Bounds(points,set2) {
+            points = points || new Coord(0,0);
+            set2 = set2 || new Coord(1,1);
+            
+            var allPoints = new HashSet();
+            if(points instanceof Array) {
+                allPoints.addAll(points);
+            } else {
+                allPoints.add(points);
+            }
+            if(set2 instanceof Array) {
+                allPoints.addAll(set2);
+            } else {
+                allPoints.add(set2);
+            }
+            
+            
+            this.start = new Coord(null,null);
+            this.end = new Coord(null,null);
+            var instance = this;
+            allPoints.map(function(item) {
+                console.log(item);
+                instance.start.x = instance.start.x === null ? item.x : Math.min(instance.start.x,item.x);
+                instance.start.y = instance.start.y === null ? item.y : Math.min(instance.start.y,item.y);
+                instance.end.x   = instance.end.x   === null ? item.x : Math.max(instance.end.x,item.x);
+                instance.end.y   = instance.end.y   === null ? item.y : Math.max(instance.end.y,item.y);
+            });
+        }
+        Bounds.prototype.withinBounds = function(pos) {
+            var zeroBased = pos.sub(this.start);
+            var offset = this.end.sub(this.start);
+            return pos.withinBox(offset);
+        };
+        
+        return Bounds;
+    }());
 
     //will have to make and manager per scene
     var KeyStateManager = (function(){
@@ -317,22 +411,6 @@ var FPS = 30;
         };
         KeyStateManager.prototype.isDown = function() { return this.numOfFramesClicked === 1; };
         return KeyStateManager;
-    }());
-
-    var GameEvent = (function(){
-        function GameEvent() {
-            this.calls = new HashSet();
-        }
-        GameEvent.prototype.callAll = function(a,b,c,d,e,f,g) {
-            this.calls.foreachInSet(function(item) { item(a,b,c,d,e,f,g); });
-        };
-        GameEvent.prototype.addCallBack = function(toAdd) {
-            this.calls.add(toAdd);
-        };
-        GameEvent.prototype.removeCallBack = function (toKill) {
-            this.calls.remove(toKill);
-        };
-        return GameEvent;
     }());
     
 //endregion
@@ -1104,6 +1182,8 @@ var lastTest = null;
 
 
 function initGameScene(container) {
+    
+    var timer = new Timer();
     
     GameStates.Game.enable = function() {
         backgroundMusic.setSoundFromString("GamePlay",true);
