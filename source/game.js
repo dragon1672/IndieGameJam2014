@@ -730,85 +730,84 @@ function initSprites() {
 //endregion
 
 //region init
-    //region global assets (mouse and keys)
-        var mouse = {
-            pos: new Coord(),
-            isDown: false,
-        };
-        function mouseInit() {
-            stage.enableMouseOver();
-            stage.on("stagemousemove", function(evt) {
-                mouse.pos.x = Math.floor(evt.stageX);
-                mouse.pos.y = Math.floor(evt.stageY);
-            });
-            stage.on("stagemousedown",function(e) {
-                CurrentGameState.mouseDownEvent(e);
-                mouse.isDown = true;
-            });
-            stage.on("stagemouseup",function(e) {
-                CurrentGameState.mouseUpEvent(e);
-                mouse.isDown = false;
-            });
-        }
-        
-        //universial across all scenes
-        var keyStates = [];
-        function handleKeyDown(evt) {
-            if(!CurrentGameState) { return; }
-            if(!evt){ evt = window.event; }  //browser compatibility
-            keyStates[evt.keyCode] = true;
-            //console.log(evt.keyCode+"up");
-        }
-        function handleKeyUp(evt) {
-            if(!CurrentGameState) { return; }
-            if(!evt){ evt = window.event; }  //browser compatibility
-            keyStates[evt.keyCode] = false;
-            //console.log(evt.keyCode+"down");
-        }
-        document.onkeydown = handleKeyDown;
-        document.onkeyup = handleKeyUp;
-    //endregion
-    function setupCanvas() {
-        var canvas = document.getElementById("game");
-        if(canvas) {
-            canvas.width = 800;
-            canvas.height = 600;
-            stage = new createjs.Stage(canvas);
-            return true;
-        }
-        return false;
+//region global assets (mouse and keys)
+    var mouse = {
+        pos: new Coord(),
+        isDown: false,
+    };
+    function mouseInit() {
+        stage.enableMouseOver();
+        stage.on("stagemousemove", function(evt) {
+            mouse.pos.x = Math.floor(evt.stageX);
+            mouse.pos.y = Math.floor(evt.stageY);
+        });
+        stage.on("stagemousedown",function(e) {
+            CurrentGameState.mouseDownEvent(e);
+            mouse.isDown = true;
+        });
+        stage.on("stagemouseup",function(e) {
+            CurrentGameState.mouseUpEvent(e);
+            mouse.isDown = false;
+        });
     }
 
-    function registerGameLoop() {
-        function loop() {
-            if(CurrentGameState != LastGameState) {
-                LastGameState.masterDisable();
-                CurrentGameState.masterEnable();
-            }
-            LastGameState = CurrentGameState;
-            CurrentGameState.update();
-            stage.update();
-        }
-        createjs.Ticker.addEventListener("tick", loop);
-        createjs.Ticker.setFPS(FPS);
+    //universial across all scenes
+    var keyStates = [];
+    function handleKeyDown(evt) {
+        if(!CurrentGameState) { return; }
+        if(!evt){ evt = window.event; }  //browser compatibility
+        keyStates[evt.keyCode] = true;
+        //console.log(evt.keyCode+"up");
     }
-    
-    function main() {
-        if(setupCanvas()) {
-            mouseInit();
-            initLoadingScreen();
-            registerGameLoop();
-
-            loadFiles();
-        }
+    function handleKeyUp(evt) {
+        if(!CurrentGameState) { return; }
+        if(!evt){ evt = window.event; }  //browser compatibility
+        keyStates[evt.keyCode] = false;
+        //console.log(evt.keyCode+"down");
     }
-    
-    if (!!(window.addEventListener)) {
-        window.addEventListener("DOMContentLoaded", main);
-    } else { // if IE
-        window.attachEvent("onload", main);
-    }
+    document.onkeydown = handleKeyDown;
+    document.onkeyup = handleKeyUp;
 //endregion
+function setupCanvas() {
+    var canvas = document.getElementById("game");
+    if(canvas) {
+        canvas.width = 800;
+        canvas.height = 600;
+        stage = new createjs.Stage(canvas);
+        return true;
+    }
+    return false;
+}
+
+function registerGameLoop() {
+    function loop() {
+        if(CurrentGameState != LastGameState) {
+            LastGameState.masterDisable();
+            CurrentGameState.masterEnable();
+        }
+        LastGameState = CurrentGameState;
+        CurrentGameState.update();
+        stage.update();
+    }
+    createjs.Ticker.addEventListener("tick", loop);
+    createjs.Ticker.setFPS(FPS);
+}
+
+function main() {
+    if(setupCanvas()) {
+        mouseInit();
+        initLoadingScreen();
+        registerGameLoop();
+
+        loadFiles();
+    }
+}
+
+if (!!(window.addEventListener)) {
+    window.addEventListener("DOMContentLoaded", main);
+} else { // if IE
+    window.attachEvent("onload", main);
+}
 
 //to be called after files have been loaded
 function init() {
@@ -917,8 +916,7 @@ function initLoadingScreen() {
         this.normalizedDir = this.dir.normalized();
         this.graphic = new createjs.Shape();
         this.graphic.graphics.beginFill("#FFF").drawCircle(0, 0, Rand(2,6));
-        this.graphic.x = pos.x;
-        this.graphic.y = pos.y;
+        copyXY(this.graphic,this.pos);
         this.scale = Rand(0,maxScale);
     }
     circle.prototype.update = function() {
@@ -926,8 +924,7 @@ function initLoadingScreen() {
         if(!this.pos.sub(this.normalizedDir.mul(this.scale)).withinBox(screenDims)) {
             this.pos = this.pos.wrapByBox(screenDims).add(this.normalizedDir.mul(this.scale));
         }
-        this.graphic.x = this.pos.x;
-        this.graphic.y = this.pos.y;
+        copyXY(this.graphic,this.pos);
         
         this.scale += 0.1;
         this.scale %= maxScale;
@@ -958,6 +955,8 @@ function initLoadingScreen() {
     CurrentGameState = GameStates.Loading;
 }
 //endregion
+
+//endregion template
 
 //region GAMEOBJECT
 
@@ -1066,8 +1065,8 @@ var MathTest = (function(){
             var pair = operation.generatePair(this.rangeLow,this.rangeHigh);
             this.questions.push(new Question(pair.a,pair.b,operation));
         }
-        this.highestAnswer = Max(this.questions,function(a) { return a.correctAnswer; });
-        this.lowestAnswer  = Min(this.questions,function(a) { return a.correctAnswer; });
+        //this.highestAnswer = Max(this.questions,function(a) { return a.correctAnswer; });
+        //this.lowestAnswer  = Min(this.questions,function(a) { return a.correctAnswer; });
     };
     //should be run after test is complete
     MathTest.prototype.updateStats = function() {
@@ -1139,7 +1138,7 @@ function getCheat(question, percentForCorrect) {
     return ret;
 }
 
-//endregion
+//endregion game classes
 
 //region global vars
 
@@ -1183,9 +1182,9 @@ var globalStats = new Stats();
 
 var lastTest = null;
 
-//endregion
+//endregion global vars
 
-//endregion
+//endregion gameobj
 
 var difficulty = StockTests.length-1;
 
@@ -1241,6 +1240,14 @@ function initGameScene(container) {
     
     timer.timeCompleteEvent.addCallBack(gameComplete);
 }
+
+function copyXY(to,from) {
+    to.x = from.x;
+    to.y = from.y;
+}
+
+
+
 function initLocker(container) {
     var validStickers = new HashSet();
     var newStickers = new HashSet();
@@ -1262,9 +1269,8 @@ function initLocker(container) {
     
     allStickers.map(function(item) {
         item = new Sticker(); // asdf
+        if(item.cost < globalStats.points)
         item.graphic.on("click",function() { StickerClicked(item.clone()); });
-        //item.
-        //item.
     });
     
     GameStates.Locker.enable = function() {
@@ -1285,19 +1291,17 @@ function initLocker(container) {
         }
     }
     
-    GameStates.Locker.mouseDownEvent = function(e){
-        e=e;
+    GameStates.Locker.mouseDownEvent = function(){
         tryPlaceSticker();
     };
     
-    GameStates.Locker.mouseUpEvent = function(e){
-        e=e;
+    GameStates.Locker.mouseUpEvent = function(){
         tryPlaceSticker();
     };
     
     GameStates.Locker.update = function() {
         if(stickerStuckToMouse !== null) {
-            
+            copyXY(stickerStuckToMouse.graphic,mouse.pos);
         }
     };
     
