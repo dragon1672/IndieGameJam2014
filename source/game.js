@@ -697,12 +697,15 @@ function initSprites() {
         document.onkeydown = handleKeyDown;
         document.onkeyup = handleKeyUp;
     //endregion
-    
     function setupCanvas() {
         var canvas = document.getElementById("game");
-        canvas.width = 800;
-        canvas.height = 600;
-        stage = new createjs.Stage(canvas);
+        if(canvas) {
+            canvas.width = 800;
+            canvas.height = 600;
+            stage = new createjs.Stage(canvas);
+            return true;
+        }
+        return false;
     }
 
     function registerGameLoop() {
@@ -720,12 +723,13 @@ function initSprites() {
     }
     
     function main() {
-        setupCanvas();
-        mouseInit();
-        initLoadingScreen();
-        registerGameLoop();
+        if(setupCanvas()) {
+            mouseInit();
+            initLoadingScreen();
+            registerGameLoop();
 
-        loadFiles();
+            loadFiles();
+        }
     }
     
     if (!!(window.addEventListener)) {
