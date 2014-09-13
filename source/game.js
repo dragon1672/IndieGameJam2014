@@ -961,6 +961,7 @@ function initLoadingScreen() {
         pos = pos || new Coord();
         this.pos = new Coord();
         this.dir = randomDir().mul(Rand(3,6));
+        this.normalizedDir = this.dir.normalized();
         this.graphic = new createjs.Shape();
         this.graphic.graphics.beginFill("#FFF").drawCircle(0, 0, Rand(2,6));
         this.graphic.x = pos.x;
@@ -969,7 +970,9 @@ function initLoadingScreen() {
     }
     circle.prototype.update = function() {
         this.pos = this.pos.add(this.dir);
-        this.pos = this.pos.wrapByBox(screenDims);
+        if(!this.pos.sub(this.normalizedDir.mul(this.scale)).withinBox(screenDims)) {
+            this.pos = this.pos.wrapByBox(screenDims).add(this.normalizedDir.mul(this.scale));
+        }
         this.graphic.x = this.pos.x;
         this.graphic.y = this.pos.y;
         
@@ -994,7 +997,6 @@ function initLoadingScreen() {
     var screenDims = new Coord(stage.canvas.width,stage.canvas.height);
         
     GameStates.Loading.update = function() {
-        moveAndLoop(circle,2,40);
         circles.map(function(item) {
             item.update();
         });
