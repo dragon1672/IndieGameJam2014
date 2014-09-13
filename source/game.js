@@ -1047,17 +1047,37 @@ var MathTest = (function(){
         this.highestAnswer = Max(this.questions,function(a) { return a.correctAnswer; });
         this.lowestAnswer  = Min(this.questions,function(a) { return a.correctAnswer; });
     };
+    //should be run after test is complete
+    MathTest.prototype.updateStats = function() {
+        this.stats.incorrectAnswers = 0;
+        this.stats.correctAnswers = 0;
+        this.stats.numOfTests = 1;
+        this.stats.score = 0;
+        var testInstance = this;
+        this.questions.map(function(item) {
+            if(item.correctAnswer === item.userAnswer) {
+                testInstance.stats.correctAnswers++;
+            } else {
+                testInstance.stats.incorrectAnswers++;
+            }
+        });
+        if(this.caughtCheating) {
+            this.stats.timesCaught = 1;
         } else {
+            this.stats.timesCaught = 0;
+            this.stats.score = this.stats.correctAnswers / (this.stats.incorrectAnswers + this.stats.correctAnswers);
+        }
+    };
     
     return MathTest;
 }());
 
-var StockTests = {
-    levelOne: new MathTest([DefaultMathOperations.add],5,1,12),
-    levelTwo: new MathTest([DefaultMathOperations.add,DefaultMathOperations.sub],5,1,12),
-    levelThr: new MathTest([DefaultMathOperations.add,DefaultMathOperations.sub,DefaultMathOperations.mul],5,1,12),
-    levelFou: new MathTest([DefaultMathOperations.add,DefaultMathOperations.sub,DefaultMathOperations.mul,DefaultMathOperations.div],5,1,12),
-};
+var StockTests = [
+    new MathTest([DefaultMathOperations.add],5,1,12),
+    new MathTest([DefaultMathOperations.add,DefaultMathOperations.sub],5,1,12),
+    new MathTest([DefaultMathOperations.add,DefaultMathOperations.sub,DefaultMathOperations.mul],5,1,12),
+    new MathTest([DefaultMathOperations.add,DefaultMathOperations.sub,DefaultMathOperations.mul,DefaultMathOperations.div],5,1,12),
+];
 
 function getCheat(question, percentForCorrect) {
     var ret = question.correctAnswer;
