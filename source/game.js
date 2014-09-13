@@ -598,7 +598,7 @@ var spriteSheets = {
     teacher: null,
     makeButton:     function() { return (new createjs.Sprite(this.buttons));      },
     makeMiniButton: function() { return (new createjs.Sprite(this.miniButtons));  },
-    makeSteacher:   function() { return (new createjs.Sprite(this.makeSteacher)); }
+    makeTeacher:    function() { return (new createjs.Sprite(this.makeSteacher)); }
 };
 
 
@@ -607,8 +607,6 @@ function loadImage(key) {
 }
 
 function loadFiles() {
-    
-    
     queue = new createjs.LoadQueue(true, "assets/");  //files are stored in 'images' directory
     createjs.Sound.alternateExtensions = ["mp3"];
     queue.installPlugin(createjs.Sound);
@@ -666,7 +664,7 @@ function loadFiles() {
 }
 
 function initSprites() {
-    var buttonSheet = new createjs.SpriteSheet({
+    spriteSheets.buttons = new createjs.SpriteSheet({
         images: [queue.getResult("button")],
         frames: {width: 192, height: 82, regX: 96, regY: 40},
         animations: {
@@ -693,9 +691,16 @@ function initSprites() {
         nextDown: [20, 20, "nextDown"],
         } 
     });
-    spriteSheets.buttons = buttonSheet;
     
-    var miniButtonSheet = new createjs.SpriteSheet({
+    spriteSheets.teacher = new createjs.SpriteSheet({
+        images: [queue.getResult("TeacherAnimation")],
+        frames: [[0,0,309,348,0,22.45,215.3],[0,0,309,348,0,22.45,215.3],[0,0,309,348,0,22.45,215.3],[0,0,309,348,0,22.45,215.3],[0,0,309,348,0,22.45,215.3],[309,0,309,351,0,22.45,218.3],[309,0,309,351,0,22.45,218.3],[309,0,309,351,0,22.45,218.3],[309,0,309,351,0,22.45,218.3],[618,0,309,347,0,22.45,214.3],[618,0,309,347,0,22.45,214.3],[618,0,309,347,0,22.45,214.3],[618,0,309,347,0,22.45,214.3],[618,0,309,347,0,22.45,214.3],[618,0,309,347,0,22.45,214.3],[0,351,309,308,0,22.45,175.3],[0,351,309,308,0,22.45,175.3],[0,351,309,308,0,22.45,175.3],[0,351,309,308,0,22.45,175.3],[0,351,309,308,0,22.45,175.3],[0,351,309,308,0,22.45,175.3],[0,351,309,308,0,22.45,175.3],[0,351,309,308,0,22.45,175.3],[0,351,309,308,0,22.45,175.3],[0,351,309,308,0,22.45,175.3],[0,351,309,308,0,22.45,175.3],[618,0,309,347,0,22.45,214.3],[618,0,309,347,0,22.45,214.3],[618,0,309,347,0,22.45,214.3],[618,0,309,347,0,22.45,214.3],[618,0,309,347,0,22.45,214.3],[618,0,309,347,0,22.45,214.3],[309,0,309,351,0,22.45,218.3],[309,0,309,351,0,22.45,218.3],[309,0,309,351,0,22.45,218.3],[309,0,309,351,0,22.45,218.3]],
+        animations: {
+            playUp:   [0, 36, "play",0.5],
+        } 
+    });
+    
+    spriteSheets.miniButtons = new createjs.SpriteSheet({
         images: [queue.getResult("miniButton")],
         frames: {width: 127, height: 33, regX: 64, regY: 17},
         animations: {
@@ -716,7 +721,6 @@ function initSprites() {
         miniRetryDown: [14, 14, "miniRetryDown"],
         } 
     });
-    spriteSheets.miniButtons = miniButtonSheet;
 }
 
 //endregion
