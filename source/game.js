@@ -1305,6 +1305,15 @@ function initGameScene(container) {
     var timer = new CountDownTimer(2*60); // you have 1 minutes
     var test;
     
+    var funnyResponces =  [
+        "I hate Math",
+        "...42?",
+        "NaN",
+        "I want\na retake",
+        "numbers",
+        "I'm so\nscrewed"
+    ];
+    
     var currentCheatPercent = 100;
     var cheatRange = 100;
     var cheating = -1;
@@ -1387,14 +1396,13 @@ function initGameScene(container) {
             
             currentCheatPercent -= 2;
             currentCheatPercent = clamp(currentCheatPercent,0,cheatRange);
-            //console.log(currentCheatPercent);
+            cheatText.alpha = (100-currentCheatPercent) / 200;
         } else {
             currentCheatPercent += 2;
             currentCheatPercent = clamp(currentCheatPercent,0,cheatRange);
-            //console.log(currentCheatPercent);
+            cheatText.alpha = (100-currentCheatPercent) / 300;
         }
         copyXY(cheatText,new Vec2(40,425).add(new Vec2(650,0).mul(cheating)));
-        cheatText.alpha = (100-currentCheatPercent) / 200;
         cheatOverlay.alpha = (100-currentCheatPercent) / 100;
     };
     
@@ -1402,12 +1410,12 @@ function initGameScene(container) {
         cheating = index;
         questionsCheatedOn.add(questions.currentQuestionIndex);
         cheatText.text = cheats[cheating][questions.currentQuestionIndex];
+        if(cheats[cheating][questions.currentQuestionIndex] < 0) {
+            cheatText.text = RandomElement(funnyResponces);
+        }
     }
     function stopCheating() {
         cheating = -1;
-        //var diff = cheatRange - currentCheatPercent;
-        //cheatRange =- diff / 2;
-        //remove image if it exists
     }
     
     GameStates.Game.disable = function() {
