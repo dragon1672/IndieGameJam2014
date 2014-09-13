@@ -1309,9 +1309,16 @@ function initGameScene(container) {
     var cheatRange = 100;
     var cheating = -1;
     var questionsCheatedOn;
+    var cheats;
+    var cheatOverlay = new createjs.Shape();
+    var cheatText = new createjs.Text("Cheater!","italic 20px Arial", "#888");
+    container.addChild(cheatText);
     
-    var cheat1 = CreateButtonFromSprite(spriteSheets.makeButton(),"cheat",    function() { startCheating(0); });    cheat1.on("mouseUp",stopCheating);
-    var cheat2 = CreateButtonFromSprite(spriteSheets.makeButton(),"cheat",    function() { startCheating(1); });    cheat2.on("mouseUp",stopCheating);
+    cheatOverlay.graphics.beginFill("#F00").drawRect(204, 225, 380, 600);
+    container.addChild(cheatOverlay);
+    
+    var cheat1 = CreateButtonFromSprite(spriteSheets.makeButton(),"cheat"); cheat1.on("pressup",stopCheating); cheat1.on("mousedown",function() {startCheating(0);});
+    var cheat2 = CreateButtonFromSprite(spriteSheets.makeButton(),"cheat"); cheat2.on("pressup",stopCheating); cheat2.on("mousedown",function() {startCheating(1);});
     
     cheat1.scaleX = 0.6;    cheat1.scaleY = 0.6;
     cheat2.scaleX = 0.6;    cheat2.scaleY = 0.6;
@@ -1332,7 +1339,7 @@ function initGameScene(container) {
     container.addChild(timeLeft);
     
     timer.timer.updateEvent.addCallBack(function() {
-        timeLeft.text = "Time Left: "+prettyUpSeconds(timer.getTimeLeft());
+        timeLeft.text = "Time Left: "+prettyUpSeconds(timer.getTimeLeft(),"");
     });
     
     //teacher
@@ -1350,7 +1357,7 @@ function initGameScene(container) {
         questionsCheatedOn = new HashSet();
         test = StockTests[difficulty];
         test.generate();
-        var cheats = [[],[]];
+        cheats = [[],[]];
         for(var i=0;i<test.questions.length;i++) {
             cheats[0][i] = getCheat(test.questions[i],0.75);
             cheats[1][i] = getCheat(test.questions[i],0.75);
@@ -1378,23 +1385,28 @@ function initGameScene(container) {
                 gameComplete();
             }
             
-            
-            currentCheatPercent -= 0.05;
+            currentCheatPercent -= 2;
             currentCheatPercent = clamp(currentCheatPercent,0,cheatRange);
+            //console.log(currentCheatPercent);
         } else {
-            currentCheatPercent += 0.05;
+            currentCheatPercent += 2;
             currentCheatPercent = clamp(currentCheatPercent,0,cheatRange);
+            //console.log(currentCheatPercent);
         }
+        copyXY(cheatText,new Vec2(40,425).add(new Vec2(650,0).mul(cheating)));
+        cheatText.alpha = (100-currentCheatPercent) / 200;
+        cheatOverlay.alpha = (100-currentCheatPercent) / 100;
     };
     
     function startCheating(index) {
         cheating = index;
         questionsCheatedOn.add(questions.currentQuestionIndex);
-        //get image for cheating
-        //display
+        cheatText.text = cheats[cheating][questions.currentQuestionIndex];
     }
     function stopCheating() {
         cheating = -1;
+        //var diff = cheatRange - currentCheatPercent;
+        //cheatRange =- diff / 2;
         //remove image if it exists
     }
     
