@@ -1183,5 +1183,26 @@ function initGameScene(container) {
         
     };
 }
+function initLocker(container) {
+    GameStates.Locker.enable = function() {
+    };
+    
+    GameStates.Locker.mouseDownEvent = function(e){
+        e=e;
+        
+    };
+    
+    GameStates.Locker.mouseUpEvent = function(e){
+        e=e;
+    };
+    
+    GameStates.Locker.update = function() {
+        
+    };
+    
+    GameStates.Locker.disable = function() {
+        
+    };
+}
 //endregion
 
