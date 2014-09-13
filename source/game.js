@@ -972,13 +972,9 @@ var Stats = (function(){
     
     Stats.prototype.add = function(that) {
         var ret = new Stats();
-        ret.cheatCount       = this.cheatCount       + that.cheatCount      ;
-        ret.correctAnswers   = this.correctAnswers   + that.correctAnswers  ;
-        ret.incorrectAnswers = this.incorrectAnswers + that.incorrectAnswers;
-        ret.timesCaught      = this.timesCaught      + that.timesCaught     ;
-        ret.numOfTests       = this.numOfTests       + that.numOfTests      ;
-        ret.leftOverTime     = this.leftOverTime     + that.leftOverTime    ;
-        ret.stickersBought   = this.stickersBought   + that.stickersBought  ;
+        for(var i in this) {
+            ret[i] = this[i] + that[i];
+        }
         // roll score as average
         ret.score = (this.score * this.numOfTests + that.score * that.numOfTests)  / ret.numOfTests; // ret numof tests should already be set
     };
