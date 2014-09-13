@@ -1197,6 +1197,48 @@ var HashSet = (function() {
 //region classes
 
 //asdfasdf
+var Stats = (function(){
+    function Stats() {
+        this.cheatCount = 0;
+        this.correctAnswers = 0;
+        this.incorrectAnswers = 0;
+        this.timesCaught = 0;
+        this.numOfTests = 0;
+        this.stickersBought = 0;
+    }
+    Stats.prototype.add = function(that) {
+        var ret = new Stats();
+        ret.cheatCount       += that.cheatCount      ;
+        ret.correctAnswers   += that.correctAnswers  ;
+        ret.incorrectAnswers += that.incorrectAnswers;
+        ret.timesCaught      += that.timesCaught     ;
+        ret.numOfTests       += that.numOfTests      ;
+        ret.stickersBought   += that.stickersBought  ;
+    };
+    var gradeTable = [];
+    gradeTable.push({letter:"A ", GPA: 4.0, low: 93.0, high: 100.0});
+    gradeTable.push({letter:"A-", GPA: 3.7, low: 90.0, high: 92.9});
+    gradeTable.push({letter:"B+", GPA: 3.3, low: 87.1, high: 89.9});
+    gradeTable.push({letter:"B ", GPA: 3.0, low: 83.0, high: 87.0});
+    gradeTable.push({letter:"B-", GPA: 2.7, low: 80.0, high: 82.9});
+    gradeTable.push({letter:"C+", GPA: 2.3, low: 77.1, high: 79.9});
+    gradeTable.push({letter:"C ", GPA: 2.0, low: 73.0, high: 77.0});
+    gradeTable.push({letter:"C-", GPA: 1.7, low: 70.0, high: 72.9});
+    gradeTable.push({letter:"D+", GPA: 1.3, low: 67.1, high: 69.9});
+    gradeTable.push({letter:"D ", GPA: 1.0, low: 60.0, high: 67.0});
+    gradeTable.push({letter:"F ", GPA: 0.0, low: 0,    high: 59.9});
+    Stats.prototype.grade = function() {
+        var percent = round(this.correctAnswers / (this.incorrectAnswers + this.correctAnswers) , 3) * 100;
+        return SingleSelect(gradeTable,function(a,b) {
+            if(a !== null && a.low<=percent && percent <= a.high) return a;
+            if(b !== null && b.low<=percent && percent <= b.high) return b;
+            return null;
+        });
+    };
+    
+    return Stats;
+}());
+
 var Sticker = (function(){
     function Sticker() {
         this.isUnlocked = function() { return true; };
