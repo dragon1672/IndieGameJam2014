@@ -1043,6 +1043,7 @@ var Question = (function(){
         this.userAnswer = null;
         this.text = new createjs.Text(this.a+" "+operation.char+" "+this.b+" = ", "italic 36px Orbitron", "#FFF");
         this._incorrectPool = [];
+        this.savedMultiChoice = [];
         //init incorrect pool
         {
             var i;
@@ -1063,20 +1064,21 @@ var Question = (function(){
         }
     }
     Question.prototype.genMultiChoice = function(num) {
-        var ret = new HashSet();
+        this.savedMultiChoice = new HashSet();
         var pool = new HashSet(this._incorrectPool);
         pool.remove(this.correctAnswer);
         var randomindex = Rand(0,num-1);
-        while(ret.size() < num) {
-            if(ret.size() == randomindex) {
-                ret.add(this.correctAnswer);
+        while(this.savedMultiChoice.size() < num) {
+            if(this.savedMultiChoice.size() == randomindex) {
+                this.savedMultiChoice.add(this.correctAnswer);
             } else {
                 var toAdd = RandomElement(pool.toList());
-                ret.add(toAdd);
+                this.savedMultiChoice.add(toAdd);
                 pool.remove(toAdd);
             }
         }
-        return ret.toList();
+        this.savedMultiChoice = this.savedMultiChoice.toList();
+        return this.savedMultiChoice;
     };
     Question.prototype.replaceWith = function(that) {
         this.a = that.a;
@@ -1168,20 +1170,9 @@ var Sticker = (function(){
 function getCheat(question, percentForCorrect) {
     var ret = question.correctAnswer;
     if(Math.random() > percentForCorrect) {
-        var possibleAnswers = [];
-        for(var i=-1;i<=1;i++) {
-            for(var j=-1;j<=1;j++) {
-                if(i!==0 && j!==0) {
-                    possibleAnswers.push(question.operation.comboLogic(question.a+i,question.b+j));
-                }
-            }
-        }
-        possibleAnswers.push(question.correctAnswer+1);
-        possibleAnswers.push(question.correctAnswer+2);
-        possibleAnswers.push(question.correctAnswer-1);
-        possibleAnswers.push(question.correctAnswer-2);
-        possibleAnswers = Unique(Select(possibleAnswers,function(item) { return Math.max(0,Math.round(item)); }));
-        ret = RandomElement(possibleAnswers);
+        var set = new HashSet(question.savedMultiChoice);
+        set.remove(question.correctAnswer);
+        ret = RandomElement(set.toList());
     }
     return ret;
 }
