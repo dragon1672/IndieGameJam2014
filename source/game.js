@@ -85,6 +85,7 @@ var FPS = 30;
         }
         Coord.prototype.isEqual  = function(that) { return this.x === that.x && this.y === that.y; };
         Coord.prototype.toString = function() { return "{"+this.x+","+this.y+"}"; };
+        Coord.prototype.clone    = function() { return new Coord(this); };
         //math
         Coord.prototype.add = function(that)     { return new Coord(this.x+that.x,this.y+that.y); };
         Coord.prototype.sub = function(that)     { return new Coord(this.x-that.x,this.y-that.y); };
@@ -946,7 +947,9 @@ var Stats = (function(){
         this.timesCaught = 0;
         this.numOfTests = 0;
         this.stickersBought = 0;
+        this.score = 0;
     }
+    
     Stats.prototype.add = function(that) {
         var ret = new Stats();
         ret.cheatCount       += that.cheatCount      ;
@@ -955,6 +958,8 @@ var Stats = (function(){
         ret.timesCaught      += that.timesCaught     ;
         ret.numOfTests       += that.numOfTests      ;
         ret.stickersBought   += that.stickersBought  ;
+        // roll score as average
+        ret.score = (this.score * this.numOfTests + that.score * that.numOfTests)  / ret.numOfTests; // ret numof tests should already be set
     };
     Stats.prototype.getScore = function() {
         return round(this.score , 3) * 100;
@@ -1026,10 +1031,14 @@ var MathTest = (function(){
         this.numOfQuestions = numOfQuestions;
         this.rangeLow = rangeLow;
         this.rangeHigh = rangeHigh;
+        this.stats = new Stats();
+        this.caughtCheating = false;
         this.generate();
     }
     MathTest.prototype.generate = function() {
         this.questions = [];
+        this.caughtCheating = false;
+        this.stats.cheatCount = 0; // IMPORTANT: this will need to be updated during game play
         for(var i=0;i<this.numOfQuestions;i++) {
             var operation = RandomElement(this.listOfOperations);
             var pair = operation.generatePair(this.rangeLow,this.rangeHigh);
@@ -1038,6 +1047,7 @@ var MathTest = (function(){
         this.highestAnswer = Max(this.questions,function(a) { return a.correctAnswer; });
         this.lowestAnswer  = Min(this.questions,function(a) { return a.correctAnswer; });
     };
+        } else {
     
     return MathTest;
 }());
@@ -1071,8 +1081,6 @@ function getCheat(question, percentForCorrect) {
 }
 
 
-//region locker
-
 var Sticker = (function(){
     function Sticker() {
         this.isUnlocked = function() { return true; };
@@ -1082,7 +1090,7 @@ var Sticker = (function(){
         this.pos = new Vec2();
     }
     
-    Sticker.prototype.clone() {
+    Sticker.prototype.clone = function() {
         var ret = new Sticker();
         
         ret.isUnlocked = this.isUnlocked;
@@ -1092,20 +1100,16 @@ var Sticker = (function(){
         ret.pos = new Vec2(this.pos);
         
         return ret;
-    }
+    };
     
     return Sticker;
 }());
 
+var allStickers = []; // set this somehow
+
 var Locker = {
-    var 
+    myStickers: new HashSet(),
 };
-
-//endregion
-
-
-
-
 
 var globalStats = new Stats();
 
