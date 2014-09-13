@@ -318,6 +318,22 @@ var FPS = 30;
         KeyStateManager.prototype.isDown = function() { return this.numOfFramesClicked === 1; };
         return KeyStateManager;
     }());
+
+    var GameEvent = (function(){
+        function GameEvent() {
+            this.calls = new HashSet();
+        }
+        GameEvent.prototype.callAll = function(a,b,c,d,e,f,g) {
+            this.calls.foreachInSet(function(item) { item(a,b,c,d,e,f,g); });
+        };
+        GameEvent.prototype.addCallBack = function(toAdd) {
+            this.calls.add(toAdd);
+        };
+        GameEvent.prototype.removeCallBack = function (toKill) {
+            this.calls.remove(toKill);
+        };
+        return GameEvent;
+    }());
     
 //endregion
 
@@ -854,32 +870,7 @@ function initLoadingScreen() {
 
 //region GAMEOBJECT
 
-//region classes
-
-//asdfasdf
-
-var GradeTable = {
-    data: [
-        {letter:"A ", GPA: 4.0, low: 93.0, high: 100.0},
-        {letter:"A-", GPA: 3.7, low: 90.0, high: 92.9 },
-        {letter:"B+", GPA: 3.3, low: 87.1, high: 89.9 },
-        {letter:"B ", GPA: 3.0, low: 83.0, high: 87.0 },
-        {letter:"B-", GPA: 2.7, low: 80.0, high: 82.9 },
-        {letter:"C+", GPA: 2.3, low: 77.1, high: 79.9 },
-        {letter:"C ", GPA: 2.0, low: 73.0, high: 77.0 },
-        {letter:"C-", GPA: 1.7, low: 70.0, high: 72.9 },
-        {letter:"D+", GPA: 1.3, low: 67.1, high: 69.9 },
-        {letter:"D ", GPA: 1.0, low: 60.0, high: 67.0 },
-        {letter:"F ", GPA: 0.0, low: 0,    high: 59.9 }
-    ],
-    getFromPercent: function(percent) {
-        return SingleSelect(GradeTable.data,function(a,b) {
-            if(a !== null && a.low<=percent && percent <= a.high) return a;
-            if(b !== null && b.low<=percent && percent <= b.high) return b;
-            return null;
-        });
-    }
-};
+//region game classes
 
 var Stats = (function(){
     function Stats() {
@@ -1014,35 +1005,6 @@ var MathTest = (function(){
     return MathTest;
 }());
 
-var StockTests = [
-    new MathTest([DefaultMathOperations.add],5,1,12),
-    new MathTest([DefaultMathOperations.add,DefaultMathOperations.sub],5,1,12),
-    new MathTest([DefaultMathOperations.add,DefaultMathOperations.sub,DefaultMathOperations.mul],5,1,12),
-    new MathTest([DefaultMathOperations.add,DefaultMathOperations.sub,DefaultMathOperations.mul,DefaultMathOperations.div],5,1,12),
-];
-
-function getCheat(question, percentForCorrect) {
-    var ret = question.correctAnswer;
-    if(Math.random() > percentForCorrect) {
-        var possibleAnswers = [];
-        for(var i=-1;i<=1;i++) {
-            for(var j=-1;j<=1;j++) {
-                if(i!==0 && j!==0) {
-                    possibleAnswers.push(question.operation.comboLogic(question.a+i,question.b+j));
-                }
-            }
-        }
-        possibleAnswers.push(question.correctAnswer+1);
-        possibleAnswers.push(question.correctAnswer+2);
-        possibleAnswers.push(question.correctAnswer-1);
-        possibleAnswers.push(question.correctAnswer-2);
-        possibleAnswers = Unique(Select(possibleAnswers,function(item) { return Math.max(0,Math.round(item)); }));
-        ret = RandomElement(possibleAnswers);
-    }
-    return ret;
-}
-
-
 var Sticker = (function(){
     function Sticker() {
         this.isUnlocked = function() { return true; };
@@ -1067,6 +1029,61 @@ var Sticker = (function(){
     return Sticker;
 }());
 
+function getCheat(question, percentForCorrect) {
+    var ret = question.correctAnswer;
+    if(Math.random() > percentForCorrect) {
+        var possibleAnswers = [];
+        for(var i=-1;i<=1;i++) {
+            for(var j=-1;j<=1;j++) {
+                if(i!==0 && j!==0) {
+                    possibleAnswers.push(question.operation.comboLogic(question.a+i,question.b+j));
+                }
+            }
+        }
+        possibleAnswers.push(question.correctAnswer+1);
+        possibleAnswers.push(question.correctAnswer+2);
+        possibleAnswers.push(question.correctAnswer-1);
+        possibleAnswers.push(question.correctAnswer-2);
+        possibleAnswers = Unique(Select(possibleAnswers,function(item) { return Math.max(0,Math.round(item)); }));
+        ret = RandomElement(possibleAnswers);
+    }
+    return ret;
+}
+
+//endregion
+
+//region global vars
+
+var StockTests = [
+    new MathTest([DefaultMathOperations.add],5,1,12),
+    new MathTest([DefaultMathOperations.add,DefaultMathOperations.sub],5,1,12),
+    new MathTest([DefaultMathOperations.add,DefaultMathOperations.sub,DefaultMathOperations.mul],5,1,12),
+    new MathTest([DefaultMathOperations.add,DefaultMathOperations.sub,DefaultMathOperations.mul,DefaultMathOperations.div],5,1,12)
+];
+
+var GradeTable = {
+    data: [
+        {letter:"A ", GPA: 4.0, low: 93.0, high: 100.0},
+        {letter:"A-", GPA: 3.7, low: 90.0, high: 92.9 },
+        {letter:"B+", GPA: 3.3, low: 87.1, high: 89.9 },
+        {letter:"B ", GPA: 3.0, low: 83.0, high: 87.0 },
+        {letter:"B-", GPA: 2.7, low: 80.0, high: 82.9 },
+        {letter:"C+", GPA: 2.3, low: 77.1, high: 79.9 },
+        {letter:"C ", GPA: 2.0, low: 73.0, high: 77.0 },
+        {letter:"C-", GPA: 1.7, low: 70.0, high: 72.9 },
+        {letter:"D+", GPA: 1.3, low: 67.1, high: 69.9 },
+        {letter:"D ", GPA: 1.0, low: 60.0, high: 67.0 },
+        {letter:"F ", GPA: 0.0, low: 0,    high: 59.9 }
+    ],
+    getFromPercent: function(percent) {
+        return SingleSelect(GradeTable.data,function(a,b) {
+            if(a !== null && a.low<=percent && percent <= a.high) return a;
+            if(b !== null && b.low<=percent && percent <= b.high) return b;
+            return null;
+        });
+    }
+};
+
 var allStickers = []; // set this somehow
 
 var Locker = {
@@ -1077,22 +1094,7 @@ var globalStats = new Stats();
 
 var lastTest = null;
 
-
-var GameEvent = (function(){
-    function GameEvent() {
-        this.calls = new HashSet();
-    }
-    GameEvent.prototype.callAll = function(a,b,c,d,e,f,g) {
-        this.calls.foreachInSet(function(item) { item(a,b,c,d,e,f,g); });
-    };
-    GameEvent.prototype.addCallBack = function(toAdd) {
-        this.calls.add(toAdd);
-    };
-    GameEvent.prototype.removeCallBack = function (toKill) {
-        this.calls.remove(toKill);
-    };
-    return GameEvent;
-}());
+//endregion
 
 //endregion
 
