@@ -423,8 +423,6 @@ var FPS = 30;
     
 //endregion
 
-
-
 //region functions
     function stackButtons(buttons, padding, x,y) {
         var bottomPos = y === undefined ? x : (x || new Coord(stage.canvas.width/2,padding));
@@ -523,9 +521,9 @@ var manifest = [
     {src:"audio/Loading.mp3", id:"Loading"},
     {src:"images/Static/Title.png", id:"title"},
     {src:"images/Static/locker.png", id:"locker"}, // asdfadsf
-    {src:"images/Static/GameScene.png", id:"GameScene"}, // asdfadsf
+    {src:"images/Static/GameScene.png", id:"GameScene"},
     {src:"images/Static/Instructions.png", id:"instructions"},
-    {src:"images/Static/GameOver.png", id:"bluGameover"},
+    {src:"images/Static/GameOver.png", id:"GameOver"},
     {src:"images/Static/Credits.png", id:"credits"},
     {src:"audio/GameOver.mp3", id:"Failure"},
     {src:"audio/GamePlay.mp3", id:"GamePlay"},
@@ -533,6 +531,7 @@ var manifest = [
     {src:"images/miniButtons.png", id:"miniButton"},
     {src:"images/SpeakerOn.png", id:"SpeakerOn"},
     {src:"images/SpeakerOff.png", id:"SpeakerOff"},
+    {src:"images/TeacherAnimation.png", id:"TeacherAnimation"},
     {src:"audio/TinyTick.mp3", id:"tinyTick"},
     {src:"audio/Tick.mp3", id:"tick"},
     {src:"audio/Kaching.mp3", id:"kaching"},
@@ -596,15 +595,12 @@ var spriteSheets = {
     buttons: null,
     miniButtons: null,
     levelButtons: null,
-    stars: null,
-    makeButton: function() {
-        return (new createjs.Sprite(this.buttons));
-    },
-    makeMiniButton: function() {
-        return (new createjs.Sprite(this.miniButtons));
-    },
-    mainCharacter: null
+    teacher: null,
+    makeButton:     function() { return (new createjs.Sprite(this.buttons));      },
+    makeMiniButton: function() { return (new createjs.Sprite(this.miniButtons));  },
+    makeSteacher:   function() { return (new createjs.Sprite(this.makeSteacher)); }
 };
+
 
 function loadImage(key) {
     return new createjs.Bitmap(queue.getResult(key));
@@ -809,9 +805,10 @@ function initSprites() {
 //to be called after files have been loaded
 function init() {
     GameStates.StartScreen.container.addChild(  loadImage("title")        );
+    GameStates.Game.container.addChild(         loadImage("GameScene")    );
     GameStates.Instructions.container.addChild( loadImage("instructions") );
-    GameStates.Credits.container.addChild(      loadImage("credits") );
-    GameStates.Credits.container.addChild(      loadImage("credits") );
+    GameStates.Credits.container.addChild(      loadImage("credits")  );
+    GameStates.GameOver.container.addChild(     loadImage("GameOver") );
     
     for(var propertyName in GameStates) {
         stage.addChild(GameStates[propertyName].container);
