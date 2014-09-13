@@ -395,7 +395,6 @@ var FPS = 30;
             this.end = new Coord(null,null);
             var instance = this;
             allPoints.map(function(item) {
-                console.log(item);
                 instance.start.x = instance.start.x === null ? item.x : Math.min(instance.start.x,item.x);
                 instance.start.y = instance.start.y === null ? item.y : Math.min(instance.start.y,item.y);
                 instance.end.x   = instance.end.x   === null ? item.x : Math.max(instance.end.x,item.x);
@@ -1290,8 +1289,8 @@ function initGameScene(container) {
     var cheating = -1;
     var questionsCheatedOn;
     
-    var cheat1 = CreateButtonFromSprite(spriteSheets.makeButton(),"cheat",    function() { startCheating(0); });
-    var cheat2 = CreateButtonFromSprite(spriteSheets.makeButton(),"cheat",    function() { startCheating(1); });
+    var cheat1 = CreateButtonFromSprite(spriteSheets.makeButton(),"cheat",    function() { startCheating(0); });    cheat1.on("mouseUp",stopCheating);
+    var cheat2 = CreateButtonFromSprite(spriteSheets.makeButton(),"cheat",    function() { startCheating(1); });    cheat2.on("mouseUp",stopCheating);
     
     cheat1.scaleX = 0.6;    cheat1.scaleY = 0.6;
     cheat2.scaleX = 0.6;    cheat2.scaleY = 0.6;
@@ -1354,6 +1353,7 @@ function initGameScene(container) {
                 //caught!
                 //mark cheated
                 test.caughtCheating = true;
+                console.log("Dirty Cheater");
                 gameComplete();
             }
             
