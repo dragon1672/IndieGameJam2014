@@ -529,8 +529,12 @@ var manifest = [
     {src:"images/Static/Instructions.png", id:"instructions"},
     {src:"images/Static/GameOver.png", id:"GameOver"},
     {src:"images/Static/Credits.png", id:"credits"},
-    {src:"audio/GameOver.mp3", id:"Failure"},
-    {src:"audio/GamePlay.mp3", id:"GamePlay"},
+    {src:"audio/moralMathTheme.wav", id:"Failure"},
+    {src:"audio/moralMathNeutral.wav", id:"GamePlay"},
+    {src:"audio/moralMathPositive1.wav", id:"Pos1"},
+    {src:"audio/moralMathPositive2.wav", id:"Pos2"},
+    {src:"audio/moralMathNegative1.wav", id:"Neg1"},
+    {src:"audio/moralMathNegative2.wav", id:"Neg2"},
     {src:"images/buttons.png", id:"button"},
     {src:"images/miniButtons.png", id:"miniButton"},
     {src:"images/SpeakerOn.png", id:"SpeakerOn"},
@@ -541,6 +545,7 @@ var manifest = [
     {src:"audio/Kaching.mp3", id:"kaching"},
     {src:"audio/Fizzle.mp3", id:"fizzle"},
     {src:"audio/ForJamie.mp3", id:"Friday"},
+    {src:"audio/moralMathTheme.wav", id:"StartScreen"},
 ];
 
 var queue;
