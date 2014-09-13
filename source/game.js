@@ -1041,7 +1041,7 @@ var Question = (function(){
         this.operation = operation;
         this.correctAnswer = operation.comboLogic(this.a,this.b);
         this.userAnswer = null;
-        this.text = new createjs.Text(this.a+" "+operation.char+" "+this.b+" = ", "italic 36px Orbitron", "#FFF");
+        this.text = new createjs.Text(this.a+" "+operation.char+" "+this.b+" = __", "bold italic 35px Rage", "#000");
         this._incorrectPool = [];
         this.savedMultiChoice = [];
         //init incorrect pool
@@ -1172,6 +1172,7 @@ function getCheat(question, percentForCorrect) {
     if(Math.random() > percentForCorrect) {
         var set = new HashSet(question.savedMultiChoice);
         set.remove(question.correctAnswer);
+        set.add(-1); // for chicken scratch
         ret = RandomElement(set.toList());
     }
     return ret;
@@ -1227,15 +1228,11 @@ var lastTest = null;
 
 var difficulty = StockTests.length-1;
 
-function initGameScene(container) {
-    
-    var timer = new CountDownTimer(1*60); // you have 1 minutes
-    var test;
-    var questions = {
+var questions = {
         questions: [],
         currentQuestionIndex: 0,
-        startingPos: new Vec2(50,50),
-        spacing: new Vec2(0,10),
+        startingPos: new Vec2(250,250),
+        spacing: new Vec2(0,70),
         currentIndexGraphic: new createjs.Shape(),
         updateCurrentGraphics: function() {
             var pos = this.startingPos.add(this.spacing.mul(this.currentQuestionIndex));
@@ -1244,13 +1241,18 @@ function initGameScene(container) {
         updateAllGraphics: function() {
             for(var i=0;i<this.questions.length;i++) {
                 var pos = this.startingPos.add(this.spacing.mul(i));
-                this.questions[i].text.x = pos.x;
-                this.questions[i].text.x = pos.y;
+                copyXY(this.questions[i].text,pos);
             }
         
             this.updateCurrentGraphics();
         }
     };
+
+function initGameScene(container) {
+    
+    var timer = new CountDownTimer(1*60); // you have 1 minutes
+    var test;
+    
     //questions.currentIndexGraphic.beginFill("#000").drawRect(0,0,5,5);
     //container.add(questions.currentIndexGraphic);
     
