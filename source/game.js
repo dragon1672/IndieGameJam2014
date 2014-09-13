@@ -454,10 +454,10 @@ var FPS = 30;
     function generateRegButton(title) {
         return function(button,onClickMethod) {
             button.gotoAndStop(title+"Up");
-            button.on("click", onClickMethod);
-            button.on("mouseover", function(evt) { evt = evt; createjs.Sound.play("tinyTick"); button.gotoAndStop(title+"Over"); });
-            button.on("mouseout",  function(evt) { evt = evt; button.gotoAndStop(title+"Up"); });
-            button.on("mousedown", function(evt) { evt = evt; button.gotoAndStop(title+"Down"); });
+            button.on("click", function(e)    { createjs.Sound.play("tick"); onClickMethod(e);});
+            button.on("mouseover", function() { createjs.Sound.play("tinyTick"); button.gotoAndStop(title+"Over"); });
+            button.on("mouseout",  function() { button.gotoAndStop(title+"Up");   });
+            button.on("mousedown", function() { button.gotoAndStop(title+"Down"); });
             return button;
         };
     }
@@ -677,27 +677,27 @@ function initSprites() {
         images: [queue.getResult("button")],
         frames: {width: 192, height: 82, regX: 96, regY: 40},
         animations: {
-        playUp:   [0, 0, "playUp"],
-        playOver: [1, 1, "playOver"],
-        playDown: [2, 2, "playDown"],
-        instructUp:   [3, 3, "instructUp"],
+        playUp:       [0, 0, "playUp"  ],
+        playOver:     [1, 1, "playOver"],
+        playDown:     [2, 2, "playDown"],
+        instructUp:   [3, 3, "instructUp"  ],
         instructOver: [4, 4, "instructOver"],
         instructDown: [5, 5, "instructDown"],
-        menuUp:   [6, 6, "menuUp"],
-        menuOver: [7, 7, "menuOver"],
-        menuDown: [8, 8, "menuDown"],
-        creditsUp:   [9, 9,   "creditsUp"],
-        creditsOver: [10, 10, "creditsOver"],
-        creditsDown: [11, 11, "creditsDown"],
-        levelUp:   [12, 12, "levelUp"],
-        levelOver: [13, 13, "levelOver"],
-        levelDown: [14, 14, "levelDown"],
-        retryUp:   [15, 15, "retryUp"],
-        retryOver: [16, 16, "retryOver"],
-        retryDown: [17, 17, "retryDown"],
-        nextUp:   [18, 18, "nextUp"],
-        nextOver: [19, 19, "nextOver"],
-        nextDown: [20, 20, "nextDown"],
+        menuUp:       [6, 6, "menuUp"  ],
+        menuOver:     [7, 7, "menuOver"],
+        menuDown:     [8, 8, "menuDown"],
+        creditsUp:    [9, 9,   "creditsUp"  ],
+        creditsOver:  [10, 10, "creditsOver"],
+        creditsDown:  [11, 11, "creditsDown"],
+        lockerUp:     [12, 12, "lockerUp"  ],
+        lockerOver:   [13, 13, "lockerOver"],
+        lockerDown:   [14, 14, "lockerDown"],
+        cheatUp:      [15, 15, "cheatUp"  ],
+        cheatOver:    [16, 16, "cheatOver"],
+        cheatDown:    [17, 17, "cheatDown"],
+        dummyp:       [18, 18, "dummyUp"  ],
+        dummyver:     [19, 19, "dummyOver"],
+        dummyown:     [20, 20, "dummySown"],
         } 
     });
     
@@ -857,9 +857,13 @@ function init() {
             backgroundMusic.setSoundFromString("StartScreen",true);
         };
         var BTN = [];
-        BTN.push(CreateButtonFromSprite(spriteSheets.makeButton(),"play",    function() { CurrentGameState = GameStates.Game;createjs.Sound.play("tick");}));
-        BTN.push(CreateButtonFromSprite(spriteSheets.makeButton(),"instruct",function() { CurrentGameState = GameStates.Instructions; createjs.Sound.play("tick");}));
-        BTN.push(CreateButtonFromSprite(spriteSheets.makeButton(),"credits", function() { CurrentGameState = GameStates.Credits; createjs.Sound.play("tick");}));
+        BTN.push(CreateButtonFromSprite(spriteSheets.makeButton(),"play",    function() { CurrentGameState = GameStates.Game;}));
+        //if(lastTest !== null)
+        {
+            BTN.push(CreateButtonFromSprite(spriteSheets.makeButton(),"locker",    function() { CurrentGameState = GameStates.Locker;}));
+        }
+        BTN.push(CreateButtonFromSprite(spriteSheets.makeButton(),"instruct",function() { CurrentGameState = GameStates.Instructions; }));
+        BTN.push(CreateButtonFromSprite(spriteSheets.makeButton(),"credits", function() { CurrentGameState = GameStates.Credits; }));
         
         stackButtons(BTN,10,new Coord(600,100));
         
@@ -871,7 +875,7 @@ function init() {
     //init instructions
     {
         var BTN_mainMenu = spriteSheets.makeButton();
-        CreateButtonFromSprite(BTN_mainMenu,"menu",function() { CurrentGameState = GameStates.StartScreen; createjs.Sound.play("tick");});
+        CreateButtonFromSprite(BTN_mainMenu,"menu",function() { CurrentGameState = GameStates.StartScreen; });
         BTN_mainMenu.x = stage.canvas.width - BTN_mainMenu.getBounds().width - PADDING+20;
         BTN_mainMenu.y = stage.canvas.height - BTN_mainMenu.getBounds().height - PADDING+20;
         GameStates.Instructions.container.addChild(BTN_mainMenu);
@@ -879,7 +883,7 @@ function init() {
     }
     //init credits
     {
-        var BTN_mainMenu_creditsScreen = CreateButtonFromSprite(spriteSheets.makeButton(),"menu",function() { CurrentGameState = GameStates.StartScreen; createjs.Sound.play("tick");});
+        var BTN_mainMenu_creditsScreen = CreateButtonFromSprite(spriteSheets.makeButton(),"menu",function() { CurrentGameState = GameStates.StartScreen; });
         BTN_mainMenu_creditsScreen.x = stage.canvas.width - BTN_mainMenu_creditsScreen.getBounds().width - PADDING;
         BTN_mainMenu_creditsScreen.y = stage.canvas.height - BTN_mainMenu_creditsScreen.getBounds().height - PADDING;
         GameStates.Credits.container.addChild(BTN_mainMenu_creditsScreen);
