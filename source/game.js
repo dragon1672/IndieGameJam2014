@@ -291,6 +291,8 @@ var FPS = 30;
     
 //endregion
 
+
+
 //region functions
     function stackButtons(buttons, padding, bottomPos) {
         bottomPos = bottomPos || new Coord(stage.canvas.width/2,padding);
@@ -335,6 +337,11 @@ var FPS = 30;
         theArray.map(function(item) { if(condition(item)) { ret.push(item); }});
         return ret;
     }
+    function Unique(array) {
+        var set = new HashSet();
+        set.addAll(array);
+        return set.toList();
+    }
     function Rand(min,max) {
         return Math.round(Math.random() * (max - min) + min);
     }
@@ -344,12 +351,16 @@ var FPS = 30;
     function SingleSelect(array,selector) {
         selector = selector || function(a,b) { return a > b ? a : b; };
         var ret = null;
-        array.map(function(item) { ret = ret === null ? item : selector(item,ret);});
+        var first = true;
+        array.map(function(item) {
+            ret = first ? item : selector(item,ret);
+            first = false;
+        });
         return ret;
     }
-    function Max(array) { return SingleSelect(array,function(a,b) { return a > b ? a : b; }); }
-    function Min(array) { return SingleSelect(array,function(a,b) { return a < b ? a : b; }); }
-    function Sum(array) { return SingleSelect(array,function(a,b) { return a + b; }); }
+    function Max(array, numToCompare) { numToCompare = numToCompare || function(a) { return a; }; return SingleSelect(array,function(a,b) { return numToCompare(a) > numToCompare(b) ? a : b; }); }
+    function Min(array, numToCompare) { numToCompare = numToCompare || function(a) { return a; }; return SingleSelect(array,function(a,b) { return numToCompare(a) < numToCompare(b) ? a : b; }); }
+    function Sum(array, numToCompare) { return SingleSelect(array,function(a,b) { return a + b; }); }
     function Select(array,selector) {
         selector = selector || function(item) { return item; };
         var ret = [];
