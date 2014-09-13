@@ -894,6 +894,7 @@ function init() {
     initGameScene(GameStates.Game.container);
     //init gameOver
     {
+        //lastTest
         //display test and score
         //offer button to goto home
         GameStates.GameOver.enable = function() {
@@ -1051,7 +1052,7 @@ var Question = (function(){
         this.operation = operation;
         this.correctAnswer = operation.comboLogic(this.a,this.b);
         this.userAnswer = null;
-        this.text = new createjs.Text(this.a+" "+operation.char+" "+this.b+" = __", "bold italic 35px Rage", "#000");
+        this.text = this.a+" "+operation.char+" "+this.b+" = ";
         this._incorrectPool = [];
         this.savedMultiChoice = [];
         //init incorrect pool
@@ -1096,7 +1097,7 @@ var Question = (function(){
         this.operation = that.operation;
         this.correctAnswer = that.correctAnswer;
         this.userAnswer = that.userAnswer;
-        this.text.text = that.text.text;
+        this.text = that.text;
     };
     return Question;
 }());
@@ -1111,19 +1112,14 @@ var MathTest = (function(){
         this.stats = new Stats();
         this.caughtCheating = false;
     }
-    MathTest.prototype.generate = function(container) {
+    MathTest.prototype.generate = function() {
         this.caughtCheating = false;
+        this.questions = [];
         this.stats.cheatCount = 0; // IMPORTANT: this will need to be updated during game play
         for(var i=0;i<this.numOfQuestions;i++) {
             var operation = RandomElement(this.listOfOperations);
             var pair = operation.generatePair(this.rangeLow,this.rangeHigh);
-            var newQuestion = new Question(pair.a,pair.b,operation);
-            if(i >= this.questions.length) {
-                this.questions.push(newQuestion);
-                container.addChild(newQuestion.text);
-            } else {
-                this.questions[i].replaceWith(newQuestion);
-            }
+            this.questions.push(new Question(pair.a,pair.b,operation));
         }
         //this.highestAnswer = Max(this.questions,function(a) { return a.correctAnswer; });
         //this.lowestAnswer  = Min(this.questions,function(a) { return a.correctAnswer; });
@@ -1239,24 +1235,21 @@ var lastTest = null;
 var difficulty = StockTests.length-1;
 
 var questions = {
-        questions: [],
-        currentQuestionIndex: 0,
-        startingPos: new Vec2(250,250),
-        spacing: new Vec2(0,70),
-        currentIndexGraphic: new createjs.Shape(),
-        updateCurrentGraphics: function() {
-            var pos = this.startingPos.add(this.spacing.mul(this.currentQuestionIndex));
-            copyXY(this.currentIndexGraphic,pos);
-        },
-        updateAllGraphics: function() {
-            for(var i=0;i<this.questions.length;i++) {
-                var pos = this.startingPos.add(this.spacing.mul(i));
-                copyXY(this.questions[i].text,pos);
-            }
+    questions: [],
+    currentQuestionIndex: 0,
+    startingPos: new Vec2(250,350),
+    spacing: new Vec2(0,70),
+    currentQuestionText: new createjs.Text("Questions", "bold italic 35px Arial", "#000"),
+    currentAnswerText: new createjs.Text(" ", "bold italic 35px Rage", "#000"),
+    updateCurrentGraphic: function() {
+        var q = this.questions[this.currentQuestionIndex];
+        this.currentQuestionText.text = q.text;
+        copyXY(this.currentQuestionText,this.startingPos);
         
-            this.updateCurrentGraphics();
-        }
-    };
+        this.currentAnswerText.text = q.userAnswer === null ? "122" : q.userAnswer;
+        copyXY(this.currentAnswerText,this.startingPos.add(new Coord(150,0)));
+    },
+};
 
 function initGameScene(container) {
     
@@ -1266,10 +1259,19 @@ function initGameScene(container) {
     var currentCheatPercent = 100;
     var cheatRange = 100;
     var cheating = -1;
-    var questionsCheatedOne;
+    var questionsCheatedOn;
     
-    var cheat1 = new createjs.Shape(); // TODO: i need buttons
-    var cheat2 = new createjs.Shape();
+    var cheat1 = CreateButtonFromSprite(spriteSheets.makeButton(),"cheat",    function() { startCheating(0); });
+    var cheat2 = CreateButtonFromSprite(spriteSheets.makeButton(),"cheat",    function() { startCheating(1); });
+    
+    container.addChild(cheat1);
+    container.addChild(cheat2);
+    container.addChild(questions.currentQuestionText);
+    container.addChild(questions.currentAnswerText);
+    
+    var title = new createjs.Text("Super Hard Test", "bold italic 25px Arial", "#000");
+    copyXY(title,new Vec2(250,230));
+    container.addChild(title);
     
     var teacher = spriteSheets.makeTeacher();
     teacher.gotoAndPlay("Play");
@@ -1283,9 +1285,9 @@ function initGameScene(container) {
     GameStates.Game.enable = function() {
         backgroundMusic.setSoundFromString("GamePlay",true);
         //generate test
-        questionsCheatedOne = new HashSet();
+        questionsCheatedOn = new HashSet();
         test = StockTests[difficulty];
-        test.generate(container);
+        test.generate();
         var cheats = [[],[]];
         for(var i=0;i<test.questions.length;i++) {
             cheats[0][i] = getCheat(test.questions[i],0.75);
@@ -1295,7 +1297,7 @@ function initGameScene(container) {
         //reset collection
         questions.currentIndexGraphic = 0;
         questions.questions = test.questions;
-        questions.updateAllGraphics();
+        questions.updateCurrentGraphic();
         
         timer.start();
     };
@@ -1329,7 +1331,7 @@ function initGameScene(container) {
     
     function startCheating(index) {
         cheating = index;
-        questionsCheatedOne.add(questions.currentQuestionIndex);
+        questionsCheatedOn.add(questions.currentQuestionIndex);
         //get image for cheating
         //display
     }
@@ -1349,7 +1351,7 @@ function initGameScene(container) {
             //play audio
         }
         test.updateStats();
-        test.stats.cheatCount += questionsCheatedOne.size();
+        test.stats.cheatCount += questionsCheatedOn.size();
         //test.stats.points = ??? // do something
         
         //fade screen
