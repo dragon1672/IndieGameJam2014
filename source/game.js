@@ -107,7 +107,45 @@ var FPS = 30;
         Coord.prototype.floor      = function()     { return new Coord(Math.floor(this.x),Math.floor(this.y)); };
         return Coord;
     }());
-
+    
+    var Bounds = (function(){
+        function Bounds(points,set2) {
+            points = points || new Coord(0,0);
+            set2 = set2 || new Coord(1,1);
+            
+            var allPoints = new HashSet();
+            if(points instanceof Array) {
+                points.addAll(points);
+            } else {
+                points.add(points);
+            }
+            if(set2 instanceof Array) {
+                set2.addAll(points);
+            } else {
+                points.add(set2);
+            }
+            
+            
+            this.start = new Coord(null,null);
+            this.end = new Coord(null,null);
+            var instance = this;
+            allPoints.map(function(item) {
+                console.log(item);
+                instance.start.x = instance.start.x === null ? item.x : Math.min(instance.start.x,item.x);
+                instance.start.y = instance.start.y === null ? item.y : Math.min(instance.start.y,item.y);
+                instance.end.x   = instance.end.x   === null ? item.x : Math.max(instance.end.x,item.x);
+                instance.end.y   = instance.end.y   === null ? item.y : Math.max(instance.end.y,item.y);
+            });
+        }
+        Bounds.prototype.withinBounds = function(pos) {
+            var zeroBased = pos.sub(this.start);
+            var offset = this.end.sub(this.start);
+            return pos.withinBox(offset);
+        };
+        
+        return Bounds;
+    }());
+    
     //region hasy
 
     /*
