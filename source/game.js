@@ -1268,8 +1268,9 @@ var GradeTable = {
 
 var allStickers = []; // set this somehow
 
-var Locker = {
+var myLocker = {
     myStickers: new HashSet(),
+    bounds: new Bounds(new Coord(0,0),new Coord(1,1)), // update
 };
 
 var globalStats = new Stats();
@@ -1429,12 +1430,22 @@ function initLocker(container) {
     var validStickers = new HashSet();
     var newStickers = new HashSet();
     
-    var stickerStuckToMouse = null;
-    
-    var lockerSpace = new Bounds(new Coord(0,0),new Coord(1,1)); // update
-    
     function StickerClicked(cloneOfSticker) {
-        stickerStuckToMouse = cloneOfSticker;
+        if(globalStats.points >= cloneOfSticker.cost) {
+            //buying sticker
+            globalStats.points += cloneOfSticker.cost;
+            //randomly place locker
+            cloneOfSticker.pos = myLocker.bounds.randomPointInside();
+            //register update
+            cloneOfSticker.on("pressmove",function(evt) {
+                evt.target.x = evt.stageX;
+                evt.target.y = evt.stageY;
+            });
+            cloneOfSticker.on("pressup", function() {
+                // add check for trash?
+            });
+            myLocker.myStickers.add(cloneOfSticker);
+        }
     }
     
     allStickers.map(function(item) {
@@ -1454,29 +1465,12 @@ function initLocker(container) {
         
     };
     
-    function tryPlaceSticker() {
-        if(stickerStuckToMouse !== null) {
-            //if valid then spot place and charge points update disabled stickers
-            if(lockerSpace.withinBounds(mouse.pos)) {
-                globalStats.points += stickerStuckToMouse.cost;
-                stickerStuckToMouse = null;
-            }
-            //if not ignore click
-        }
-    }
+    GameStates.Locker.mouseDownEvent = function(){ };
     
-    GameStates.Locker.mouseDownEvent = function(){
-        tryPlaceSticker();
-    };
-    
-    GameStates.Locker.mouseUpEvent = function(){
-        tryPlaceSticker();
-    };
+    GameStates.Locker.mouseUpEvent = function(){ };
     
     GameStates.Locker.update = function() {
-        if(stickerStuckToMouse !== null) {
-            copyXY(stickerStuckToMouse.graphic,mouse.pos);
-        }
+        
     };
     
     GameStates.Locker.disable = function() {
