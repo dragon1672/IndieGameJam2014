@@ -1178,6 +1178,97 @@ var HashSet = (function() {
 //endregion
 
 //region classes
+var BinaryMathOperation = (function(){
+    function BinaryMathOperation(comboLogic, char) {
+        this.comboLogic = comboLogic;
+        this.char = char;
+    }
+    BinaryMathOperation.prototype.generatePair = function(rangeLow,rangeHigh) {
+        return {
+            a: Rand(rangeLow,rangeHigh),
+            b: Rand(rangeLow,rangeHigh),
+        };
+    };
+    
+    return BinaryMathOperation;
+}());
+
+var defaultMathOperations = {
+    add: new BinaryMathOperation(function(a,b) { return a + b; },"+"),
+    sub: new BinaryMathOperation(function(a,b) { return a - b; },"-"),
+    mul: new BinaryMathOperation(function(a,b) { return a * b; },"*"),
+    div: new BinaryMathOperation(function(a,b) { return a / b; },"/"),
+};
+defaultMathOperations.div.generatePair = function(rangeLow,rangeHigh) {
+    var multTable = [];
+    for(var i=rangeLow;i<=rangeHigh;i++) {
+        multTable[i] = [];
+        for(var j=rangeLow;j<=rangeHigh;j++) {
+            multTable[i][j] = i * j;
+        }
+    }
+    var ret = {
+        a: null,
+        b: Rand(rangeLow,rangeHigh),
+    };
+    ret.a = multTable[ret.b][Rand(rangeLow,rangeHigh)];
+    return ret;
+};
+
+var Question = (function(){
+    function Question(a,b,operation) {
+        this.a = Math.max(a,b); // this prevents neg number on mul
+        this.b = Math.min(b,a);
+        this.operation = operation;
+        this.correctAnswer = operation.comboLogic(this.a,this.b);
+        this.userAnswer = null;
+        this.text = new createjs.Text(this.a+" "+operation.char+" "+this.b+" = ", "italic 36px Orbitron", "#FFF");
+    }
+    return Question;
+}());
+
+var MathTest = (function(){
+    function MathTest(listOfOperations,numOfQuestions, rangeLow, rangeHigh) {
+        this.questions = [];
+        this.listOfOperations = listOfOperations;
+        this.numOfQuestions = numOfQuestions;
+        this.rangeLow = rangeLow;
+        this.rangeHigh = rangeHigh;
+        this.generate();
+    }
+    MathTest.prototype.generate = function() {
+        this.questions = [];
+        for(var i=0;i<this.numOfQuestions;i++) {
+            var operation = RandomElement(this.listOfOperations);
+            var pair = operation.generatePair(this.rangeLow,this.rangeHigh);
+            this.questions.push(new Question(pair.a,pair.b,operation));
+        }
+        this.highestAnswer = Max(this.questions,function(a) { return a.correctAnswer; });
+        this.lowestAnswer  = Min(this.questions,function(a) { return a.correctAnswer; });
+    };
+    
+    return MathTest;
+}());
+function getCheat(question, percentForCorrect, mathTest) {
+    var ret = question.correctAnswer;
+    if(Math.random() > percentForCorrect) {
+        var possibleAnswers = [];
+        for(var i=-1;i<=1;i++) {
+            for(var j=-1;j<=1;j++) {
+                if(i!==0 && j!==0) {
+                    possibleAnswers.push(question.operation.comboLogic(question.a+i,question.b+j));
+                }
+            }
+        }
+        possibleAnswers.push(question.correctAnswer+1);
+        possibleAnswers.push(question.correctAnswer+2);
+        possibleAnswers.push(question.correctAnswer-1);
+        possibleAnswers.push(question.correctAnswer-2);
+        possibleAnswers = Unique(Select(possibleAnswers,function(item) { return Math.max(0,Math.round(item)); }));
+        ret = RandomElement(possibleAnswers);
+    }
+    return ret;
+}
 var ItemType = { // enum
     Hazard: "haz",
     Housing: "woody",
