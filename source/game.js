@@ -1178,6 +1178,18 @@ var HashSet = (function() {
 //endregion
 
 //region classes
+
+//asdfasdf
+var Sticker = (function(){
+    function Sticker() {
+        this.isUnlocked = function() { return true; };
+        this.desc = "";
+        this.graphic = null;//new createjs.bitmap("");
+        this.cost = 5;
+    }
+    return Sticker;
+}());
+
 var BinaryMathOperation = (function(){
     function BinaryMathOperation(comboLogic, char) {
         this.comboLogic = comboLogic;
