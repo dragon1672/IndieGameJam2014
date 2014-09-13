@@ -471,9 +471,8 @@ var FPS = 30;
     }
     function prettyUpSeconds(secs) {
         var breakup = [
-            {val: 1,  suffix: "s"},
-            {val: 60, suffix: "m"},
-            {val: 60, suffix: "h"},
+            {val: 1,  suffix: ""},
+            {val: 60, suffix: ":"},
             {val: 24, suffix: " days"},
             {val: 30, suffix: " months"},
             {val: 30, suffix: " years"},
@@ -1283,7 +1282,7 @@ var questions = {
 
 function initGameScene(container) {
     
-    var timer = new CountDownTimer(1*60); // you have 1 minutes
+    var timer = new CountDownTimer(2*60); // you have 1 minutes
     var test;
     
     var currentCheatPercent = 100;
@@ -1308,7 +1307,15 @@ function initGameScene(container) {
     var title = new createjs.Text("Super Hard Test", "bold italic 25px Arial", "#000");
     copyXY(title,new Vec2(250,230));
     container.addChild(title);
+    var timeLeft = new createjs.Text("[time left]","25px EraserRegular","#fff");
+    copyXY(timeLeft,new Vec2(70,60));
+    container.addChild(timeLeft);
     
+    timer.timer.updateEvent.addCallBack(function() {
+        timeLeft.text = "Time Left: "+prettyUpSeconds(timer.getTimeLeft());
+    });
+    
+    //teacher
     var teacher = spriteSheets.makeTeacher();
     teacher.gotoAndPlay("Play");
     teacher.x = 600;
