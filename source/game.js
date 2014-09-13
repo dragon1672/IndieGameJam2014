@@ -146,7 +146,7 @@ var FPS = 30;
         return Bounds;
     }());
     
-    //region hasy
+    //region hashy
 
     /*
      * Hash table developed by Anthony Corbin
@@ -155,7 +155,6 @@ var FPS = 30;
      HashTable = HashMap = (function() {
         function HashTable() {
             this.pairs = [];
-            this.orderedPairs = [];
             this.numOfActiveIterations = 0;
         }
         function KeyValuePair(hash, key, val) {
@@ -177,7 +176,6 @@ var FPS = 30;
             var hash = this.hashObject(newKey);
             if (!this.containsKey(newKey)) {
                 this.pairs[hash] = new KeyValuePair(hash, newKey, newVal);
-                this.orderedPairs.push(this.pairs[hash]);
             } else {
                 this.pairs[hash].val = newVal;
             }
@@ -189,26 +187,11 @@ var FPS = 30;
             return null;
         };
         HashTable.prototype.remove = function (key) {
-            var i, hash;
+            var hash;
             if (this.containsKey(key)) {
                 hash = this.hashObject(key);
                 this.pairs[hash].markedForDel = true;
-                var potato = this;
-                var del = function del() {
-                    if(potato.numOfActiveIterations > 0) {
-                        setTimeout(del,10);
-                        return;
-                    }
-                    for (i = 0; i < potato.orderedPairs.length; i++) {
-                        if (potato.orderedPairs[i] === potato.pairs[hash]) {
-                            potato.orderedPairs.splice(i, 1);
-                            potato.pairs[hash] = null;
-                            return;
-                        }
-                    }
-                    throw new Error("contain returned true, but key not found");
-                };
-                del();
+                delete this.pairs[hash];
             }
         };
         HashTable.prototype.containsKey = function (key) {
@@ -217,21 +200,25 @@ var FPS = 30;
         };
         HashTable.prototype.containsValue = function (val) {
             var ret = false;
-            this.orderedPairs.map(function (item) {
-                ret = ret || item.val === val;
+            this.map(function(key,mapVal) {
+                ret = ret || mapVal === val;
             });
             return ret;
         };
         HashTable.prototype.isEmpty = function () { return this.size() === 0; };
-        HashTable.prototype.size = function () { return this.orderedPairs.length; };
+        HashTable.prototype.size = function () {
+            var ret = 0;
+            this.map(function() {ret++;});
+            return ret;
+        };
         //pass in function(key,val)
         HashTable.prototype.foreachInSet = function (theirFunction) {
             this.numOfActiveIterations++;
-            this.orderedPairs.map(function (item) {
-                if(!item.markedForDel) {
-                    theirFunction(item.key, item.val);
+            for(var i in this.pairs) {
+                if(!this.pairs[i].markedForDel) {
+                    theirFunction(this.pairs[i].key, this.pairs[i].val);
                 }
-            });
+            }
             this.numOfActiveIterations--;
         };
         HashTable.prototype.map = HashTable.prototype.foreachInSet;
