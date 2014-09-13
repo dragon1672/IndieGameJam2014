@@ -1264,27 +1264,31 @@ var BinaryMathOperation = (function(){
     return BinaryMathOperation;
 }());
 
-var defaultMathOperations = {
-    add: new BinaryMathOperation(function(a,b) { return a + b; },"+"),
-    sub: new BinaryMathOperation(function(a,b) { return a - b; },"-"),
-    mul: new BinaryMathOperation(function(a,b) { return a * b; },"*"),
-    div: new BinaryMathOperation(function(a,b) { return a / b; },"/"),
-};
-defaultMathOperations.div.generatePair = function(rangeLow,rangeHigh) {
-    var multTable = [];
-    for(var i=rangeLow;i<=rangeHigh;i++) {
-        multTable[i] = [];
-        for(var j=rangeLow;j<=rangeHigh;j++) {
-            multTable[i][j] = i * j;
-        }
-    }
-    var ret = {
-        a: null,
-        b: Rand(rangeLow,rangeHigh),
+var DefaultMathOperations = (function(){
+    var defaultMathOperations = {
+        add: new BinaryMathOperation(function(a,b) { return a + b; },"+"),
+        sub: new BinaryMathOperation(function(a,b) { return a - b; },"-"),
+        mul: new BinaryMathOperation(function(a,b) { return a * b; },"*"),
+        div: new BinaryMathOperation(function(a,b) { return a / b; },"/"),
     };
-    ret.a = multTable[ret.b][Rand(rangeLow,rangeHigh)];
-    return ret;
-};
+    defaultMathOperations.div.generatePair = function(rangeLow,rangeHigh) {
+        var multTable = [];
+        for(var i=rangeLow;i<=rangeHigh;i++) {
+            multTable[i] = [];
+            for(var j=rangeLow;j<=rangeHigh;j++) {
+                multTable[i][j] = i * j;
+            }
+        }
+        var ret = {
+            a: null,
+            b: Rand(rangeLow,rangeHigh),
+        };
+        ret.a = multTable[ret.b][Rand(rangeLow,rangeHigh)];
+        return ret;
+    };
+    return defaultMathOperations;
+}());
+
 
 var Question = (function(){
     function Question(a,b,operation) {
@@ -1320,14 +1324,15 @@ var MathTest = (function(){
     
     return MathTest;
 }());
-var stockTests = {
-    levelOne: new MathTest([defaultMathOperations.add],5,1,12),
-    levelTwo: new MathTest([defaultMathOperations.add,defaultMathOperations.sub],5,1,12),
-    levelThr: new MathTest([defaultMathOperations.add,defaultMathOperations.sub,defaultMathOperations.mul],5,1,12),
-    levelFou: new MathTest([defaultMathOperations.add,defaultMathOperations.sub,defaultMathOperations.mul,defaultMathOperations.div],5,1,12),
+
+var StockTests = {
+    levelOne: new MathTest([DefaultMathOperations.add],5,1,12),
+    levelTwo: new MathTest([DefaultMathOperations.add,DefaultMathOperations.sub],5,1,12),
+    levelThr: new MathTest([DefaultMathOperations.add,DefaultMathOperations.sub,DefaultMathOperations.mul],5,1,12),
+    levelFou: new MathTest([DefaultMathOperations.add,DefaultMathOperations.sub,DefaultMathOperations.mul,DefaultMathOperations.div],5,1,12),
 };
 
-function getCheat(question, percentForCorrect, mathTest) {
+function getCheat(question, percentForCorrect) {
     var ret = question.correctAnswer;
     if(Math.random() > percentForCorrect) {
         var possibleAnswers = [];
