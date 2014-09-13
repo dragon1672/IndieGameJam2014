@@ -1076,6 +1076,30 @@ var HashSet = (function() {
 //region classes
 
 //asdfasdf
+
+var GradeTable = {
+    data: [
+        {letter:"A ", GPA: 4.0, low: 93.0, high: 100.0},
+        {letter:"A-", GPA: 3.7, low: 90.0, high: 92.9 },
+        {letter:"B+", GPA: 3.3, low: 87.1, high: 89.9 },
+        {letter:"B ", GPA: 3.0, low: 83.0, high: 87.0 },
+        {letter:"B-", GPA: 2.7, low: 80.0, high: 82.9 },
+        {letter:"C+", GPA: 2.3, low: 77.1, high: 79.9 },
+        {letter:"C ", GPA: 2.0, low: 73.0, high: 77.0 },
+        {letter:"C-", GPA: 1.7, low: 70.0, high: 72.9 },
+        {letter:"D+", GPA: 1.3, low: 67.1, high: 69.9 },
+        {letter:"D ", GPA: 1.0, low: 60.0, high: 67.0 },
+        {letter:"F ", GPA: 0.0, low: 0,    high: 59.9 }
+    ],
+    getFromPercent: function(percent) {
+        return SingleSelect(GradeTable.data,function(a,b) {
+            if(a !== null && a.low<=percent && percent <= a.high) return a;
+            if(b !== null && b.low<=percent && percent <= b.high) return b;
+            return null;
+        });
+    }
+};
+
 var Stats = (function(){
     function Stats() {
         this.cheatCount = 0;
@@ -1094,38 +1118,14 @@ var Stats = (function(){
         ret.numOfTests       += that.numOfTests      ;
         ret.stickersBought   += that.stickersBought  ;
     };
-    var gradeTable = [];
-    gradeTable.push({letter:"A ", GPA: 4.0, low: 93.0, high: 100.0});
-    gradeTable.push({letter:"A-", GPA: 3.7, low: 90.0, high: 92.9});
-    gradeTable.push({letter:"B+", GPA: 3.3, low: 87.1, high: 89.9});
-    gradeTable.push({letter:"B ", GPA: 3.0, low: 83.0, high: 87.0});
-    gradeTable.push({letter:"B-", GPA: 2.7, low: 80.0, high: 82.9});
-    gradeTable.push({letter:"C+", GPA: 2.3, low: 77.1, high: 79.9});
-    gradeTable.push({letter:"C ", GPA: 2.0, low: 73.0, high: 77.0});
-    gradeTable.push({letter:"C-", GPA: 1.7, low: 70.0, high: 72.9});
-    gradeTable.push({letter:"D+", GPA: 1.3, low: 67.1, high: 69.9});
-    gradeTable.push({letter:"D ", GPA: 1.0, low: 60.0, high: 67.0});
-    gradeTable.push({letter:"F ", GPA: 0.0, low: 0,    high: 59.9});
+    Stats.prototype.getScore = function() {
+        return round(this.score , 3) * 100;
+    };
     Stats.prototype.grade = function() {
-        var percent = round(this.correctAnswers / (this.incorrectAnswers + this.correctAnswers) , 3) * 100;
-        return SingleSelect(gradeTable,function(a,b) {
-            if(a !== null && a.low<=percent && percent <= a.high) return a;
-            if(b !== null && b.low<=percent && percent <= b.high) return b;
-            return null;
-        });
+        return GradeTable.getFromPercent(this.getScore());
     };
     
     return Stats;
-}());
-
-var Sticker = (function(){
-    function Sticker() {
-        this.isUnlocked = function() { return true; };
-        this.desc = "";
-        this.graphic = null;//new createjs.bitmap("");
-        this.cost = 5;
-    }
-    return Sticker;
 }());
 
 var BinaryMathOperation = (function(){
@@ -1231,6 +1231,43 @@ function getCheat(question, percentForCorrect) {
     }
     return ret;
 }
+
+
+//region locker
+
+var Sticker = (function(){
+    function Sticker() {
+        this.isUnlocked = function() { return true; };
+        this.desc = "";
+        this.graphic = null;//new createjs.bitmap("");
+        this.cost = 5;
+        this.pos = new Vec2();
+    }
+    
+    Sticker.prototype.clone() {
+        var ret = new Sticker();
+        
+        ret.isUnlocked = this.isUnlocked;
+        ret.desc = this.desc;
+        ret.graphic = this.graphic.clone();
+        ret.cost = this.cost;
+        ret.pos = new Vec2(this.pos);
+        
+        return ret;
+    }
+    
+    return Sticker;
+}());
+
+var Locker = {
+    var 
+};
+
+//endregion
+
+
+
+
 
 var globalStats = new Stats();
 
