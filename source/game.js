@@ -169,9 +169,13 @@ var FPS = 30;
             return ret;
         };
         HashSet.prototype.removeSet = function (that) {
-            that.foreachInSet(function(item) {
-                this.remove(item); 
+            var ret = new HashSet();
+            this.map(function(item) {
+                if(!that.contains(item)) {
+                    ret.add(item);
+                }
             });
+            return ret;
         };
         HashSet.prototype.isEqual   = function (that) {
             return this.isSubsetOf(that) && that.isSuperSet(this);
