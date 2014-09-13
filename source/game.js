@@ -39,6 +39,7 @@ var FPS = 30;
         Credits: new GameState("credits"),
         Game : new GameState("game"),
         GameOver : new GameState("game over"),
+        Locker : new GameState("Locker"),
     };
     var CurrentGameState = GameStates.Loading;
     var LastGameState = GameStates.EMPTY;
@@ -294,8 +295,8 @@ var FPS = 30;
 
 
 //region functions
-    function stackButtons(buttons, padding, bottomPos) {
-        bottomPos = bottomPos || new Coord(stage.canvas.width/2,padding);
+    function stackButtons(buttons, padding, x,y) {
+        var bottomPos = y === undefined ? x : (x || new Coord(stage.canvas.width/2,padding));
         var offset = stage.canvas.height - padding;
         buttons.reverse();
         buttons.map(function(item) {
@@ -390,6 +391,7 @@ var FPS = 30;
 var manifest = [
     {src:"audio/Loading.mp3", id:"Loading"},
     {src:"images/Static/Title.png", id:"title"},
+    {src:"images/Static/locker.png", id:"locker"}, // asdfadsf
     {src:"images/Static/LevelSelection.png", id:"levelSelect"},
     {src:"images/Static/PauseMenu.png", id:"pauseMenu"},
     {src:"images/Static/Instructions.png", id:"instructions"},
@@ -756,19 +758,17 @@ function initSprites() {
     }
 //endregion
 
-var score = 0;
-
 //to be called after files have been loaded
 function init() {
     GameStates.StartScreen.container.addChild(  loadImage("title")        );
     GameStates.Instructions.container.addChild( loadImage("instructions") );
     GameStates.Credits.container.addChild(      loadImage("credits") );
-    stage.addChild(GameStates.EMPTY.container);         GameStates.EMPTY.masterDisable();
-    stage.addChild(GameStates.StartScreen.container);   GameStates.StartScreen.masterDisable();
-    stage.addChild(GameStates.Instructions.container);  GameStates.Instructions.masterDisable();
-    stage.addChild(GameStates.Credits.container);       GameStates.Credits.masterDisable();
-    stage.addChild(GameStates.Game.container);          GameStates.Game.masterDisable();
-    stage.addChild(GameStates.GameOver.container);      GameStates.GameOver.masterDisable();
+    GameStates.Credits.container.addChild(      loadImage("credits") );
+    
+    for(var propertyName in GameStates) {
+        stage.addChild(GameStates[propertyName].container);
+        GameStates[propertyName].masterDisable();
+    }
     
     //adding speaker
     var speaker = {
