@@ -1249,6 +1249,13 @@ var MathTest = (function(){
     
     return MathTest;
 }());
+var stockTests = {
+    levelOne: new MathTest([defaultMathOperations.add],5,1,12),
+    levelTwo: new MathTest([defaultMathOperations.add,defaultMathOperations.sub],5,1,12),
+    levelThr: new MathTest([defaultMathOperations.add,defaultMathOperations.sub,defaultMathOperations.mul],5,1,12),
+    levelFou: new MathTest([defaultMathOperations.add,defaultMathOperations.sub,defaultMathOperations.mul,defaultMathOperations.div],5,1,12),
+};
+
 function getCheat(question, percentForCorrect, mathTest) {
     var ret = question.correctAnswer;
     if(Math.random() > percentForCorrect) {
