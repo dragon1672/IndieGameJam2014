@@ -1222,20 +1222,63 @@ function initGameScene(container) {
     };
 }
 function initLocker(container) {
-    GameStates.Locker.enable = function() {
+    var validStickers = new HashSet();
+    var newStickers = new HashSet();
+    
+    var stickerStuckToMouse = null;
+    
+    var lockerSpace = {
+        start: new Coord(),
+        end: new Coord(),
+        withinBounds: function(pos) {
+            var zeroBase = pos.sub(this.start);
+            
+        }
     };
+    
+    function StickerClicked(cloneOfSticker) {
+        stickerStuckToMouse = cloneOfSticker;
+    }
+    
+    allStickers.map(function(item) {
+        item = new Sticker(); // asdf
+        item.graphic.on("click",function() { StickerClicked(item.clone()); });
+        //item.
+        //item.
+    });
+    
+    GameStates.Locker.enable = function() {
+        backgroundMusic.setSoundFromString("GamePlay",true);
+        
+        //setup stickers
+        var oldStickers = new HashSet(validStickers.toList());
+        validStickers.addAll(Where(allStickers,function(item) { item.isUnlocked(globalStats); }));
+        newStickers = validStickers.removeSet(oldStickers);
+        
+        
+    };
+    
+    function tryPlaceSticker() {
+        if(stickerStuckToMouse !== null) {
+            //if valid then spot place and charge points update disabled stickers
+            //if not ignore click
+        }
+    }
     
     GameStates.Locker.mouseDownEvent = function(e){
         e=e;
-        
+        tryPlaceSticker();
     };
     
     GameStates.Locker.mouseUpEvent = function(e){
         e=e;
+        tryPlaceSticker();
     };
     
     GameStates.Locker.update = function() {
-        
+        if(stickerStuckToMouse !== null) {
+            
+        }
     };
     
     GameStates.Locker.disable = function() {
