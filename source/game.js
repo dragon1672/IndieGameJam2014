@@ -327,6 +327,9 @@ var FPS = 30;
             this.timer.stop();
             return this.time;
         };
+        CountDownTimer.prototype.getTimeLeft = function() {
+            return this.time;
+        };
         return CountDownTimer;
     }());
     //endregion
@@ -465,6 +468,32 @@ var FPS = 30;
     function CreateButtonFromSprite(btnPlay, title, onClickMethod) {
         generateRegButton(title)(btnPlay,onClickMethod);
         return btnPlay;
+    }
+    function prettyUpSeconds(secs) {
+        var breakup = [
+            {val: 1,  suffix: "s"},
+            {val: 60, suffix: "m"},
+            {val: 60, suffix: "h"},
+            {val: 24, suffix: " days"},
+            {val: 30, suffix: " months"},
+            {val: 30, suffix: " years"},
+            {val: 30, suffix: " decades"}
+        ];
+        var data = [Math.floor(secs)];
+        var i = 0;
+        while(data[i] >= breakup[i+1].val) {
+            var temp  = data[i];
+            data[i+1]   = Math.floor(data[i] / breakup[i+1].val);
+            data[i] = temp - data[i+1] * breakup[i+1].val;//modlus
+            i++;
+        }
+        var ret = "";
+        var sep = "";
+        for(i = data.length-1;i>=0;i--) {
+            ret += sep+data[i] + breakup[i].suffix;
+            sep = " ";
+        }
+        return ret;
     }
     //condition is a function(a) reutrns true/false
     function Where(theArray, condition) {
@@ -892,6 +921,7 @@ function init() {
     }
     //init game
     initGameScene(GameStates.Game.container);
+    initLocker(GameStates.Locker.container);
     //init gameOver
     {
         //lastTest
@@ -1264,6 +1294,12 @@ function initGameScene(container) {
     var cheat1 = CreateButtonFromSprite(spriteSheets.makeButton(),"cheat",    function() { startCheating(0); });
     var cheat2 = CreateButtonFromSprite(spriteSheets.makeButton(),"cheat",    function() { startCheating(1); });
     
+    cheat1.scaleX = 0.6;    cheat1.scaleY = 0.6;
+    cheat2.scaleX = 0.6;    cheat2.scaleY = 0.6;
+    
+    copyXY(cheat1,new Vec2(100,280));
+    copyXY(cheat2,new Vec2(700,280));
+    
     container.addChild(cheat1);
     container.addChild(cheat2);
     container.addChild(questions.currentQuestionText);
@@ -1280,7 +1316,6 @@ function initGameScene(container) {
     teacher.scaleX = 0.75;
     teacher.scaleY = 0.75;
     container.addChild(teacher);
-    
     
     GameStates.Game.enable = function() {
         backgroundMusic.setSoundFromString("GamePlay",true);
@@ -1302,14 +1337,9 @@ function initGameScene(container) {
         timer.start();
     };
     
-    GameStates.Game.mouseDownEvent = function(e){
-        e=e;
-        
-    };
+    GameStates.Game.mouseDownEvent = function(){ };
     
-    GameStates.Game.mouseUpEvent = function(e){
-        e=e;
-    };
+    GameStates.Game.mouseUpEvent = function(){ };
     
     GameStates.Game.update = function() {
         if(cheating>=0) {
