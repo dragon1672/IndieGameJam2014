@@ -1179,18 +1179,29 @@ var lastTest = null;
 
 //endregion
 
-//endregion
-
-//region HUDOBJECT
-
+var difficulty = StockTests.length-1;
 
 function initGameScene(container) {
     
     var timer = new CountDownTimer(1*60); // you have 1 minutes
+    var test;
+    var questions = {
+        questions: [],
+        currentQuestionIndex: 0,
+        startingPos: new Vec2(50,50),
+        spacing: new Vec2(0,10)
+    };
     
     GameStates.Game.enable = function() {
         backgroundMusic.setSoundFromString("GamePlay",true);
         //generate test
+        test = StockTests[difficulty];
+        test.generate();
+        var cheats = [[],[]];
+        for(var i=0;i<test.questions.length;i++) {
+            cheats[0][i] = getCheat(test.questions[i],0.75);
+            cheats[1][i] = getCheat(test.questions[i],0.75);
+         }
         //display teset
         
         timer.start();
@@ -1286,5 +1297,3 @@ function initLocker(container) {
         
     };
 }
-//endregion
-
