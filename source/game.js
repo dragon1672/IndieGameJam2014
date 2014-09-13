@@ -1065,9 +1065,10 @@ var Question = (function(){
     Question.prototype.genMultiChoice = function(num) {
         var ret = new HashSet();
         var pool = new HashSet(this._incorrectPool);
-        var randomindex = Rand(this._incorrectPool,0,num);
+        pool.remove(this.correctAnswer);
+        var randomindex = Rand(0,num-1);
         while(ret.size() < num) {
-            if(ret.size()-1 == randomindex) {
+            if(ret.size() == randomindex) {
                 ret.add(this.correctAnswer);
             } else {
                 var toAdd = RandomElement(pool.toList());
@@ -1259,8 +1260,8 @@ function initGameScene(container) {
             this.updateCurrentGraphics();
         }
     };
-    questions.currentIndexGraphic.beginFill("#000").drawRect(0,0,5,5);
-    container.add(questions.currentIndexGraphic);
+    //questions.currentIndexGraphic.beginFill("#000").drawRect(0,0,5,5);
+    //container.add(questions.currentIndexGraphic);
     
     
     var currentCheatPercent = 100;
