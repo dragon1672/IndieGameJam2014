@@ -971,6 +971,7 @@ var Stats = (function(){
         this.numOfTests = 0;
         this.leftOverTime = 0;
         this.stickersBought = 0;
+        this.points = 0;
         this.score = 0;
     }
     
@@ -1041,7 +1042,49 @@ var Question = (function(){
         this.correctAnswer = operation.comboLogic(this.a,this.b);
         this.userAnswer = null;
         this.text = new createjs.Text(this.a+" "+operation.char+" "+this.b+" = ", "italic 36px Orbitron", "#FFF");
+        this._incorrectPool = [];
+        //init incorrect pool
+        {
+            var i;
+            for(i=-1;i<=1;i++) {
+                for(var j=-1;j<=1;j++) {
+                    if(i!==0 && j!==0) {
+                        this._incorrectPool.push(this.operation.comboLogic(this.a+i,this.b+j));
+                        if(this !== DefaultMathOperations.add) { this._incorrectPool.push(DefaultMathOperations.add.comboLogic(this.a+i,this.b+j)); }
+                        if(this !== DefaultMathOperations.mul) { this._incorrectPool.push(DefaultMathOperations.mul.comboLogic(this.a+i,this.b+j)); }
+                    }
+                }
+            }
+            for(i = 1;i<4;i++) {
+                this._incorrectPool.push(this.correctAnswer+i);
+                this._incorrectPool.push(this.correctAnswer-i);
+            }
+            this._incorrectPool = Unique(Select(this._incorrectPool,function(item) { return Math.max(0,Math.round(item)); }));
+        }
     }
+    Question.prototype.genMultiChoice = function(num) {
+        var ret = new HashSet();
+        var pool = new HashSet(this._incorrectPool);
+        var randomindex = Rand(this._incorrectPool,0,num);
+        while(ret.size() < num) {
+            if(ret.size()-1 == randomindex) {
+                ret.add(this.correctAnswer);
+            } else {
+                var toAdd = RandomElement(pool.toList());
+                ret.add(toAdd);
+                pool.remove(toAdd);
+            }
+        }
+        return ret.toList();
+    };
+    Question.prototype.replaceWith = function(that) {
+        this.a = that.a;
+        this.b = that.b;
+        this.operation = that.operation;
+        this.correctAnswer = that.correctAnswer;
+        this.userAnswer = that.userAnswer;
+        this.text.text = that.text.text;
+    };
     return Question;
 }());
 
@@ -1054,16 +1097,20 @@ var MathTest = (function(){
         this.rangeHigh = rangeHigh;
         this.stats = new Stats();
         this.caughtCheating = false;
-        this.generate();
     }
-    MathTest.prototype.generate = function() {
-        this.questions = [];
+    MathTest.prototype.generate = function(container) {
         this.caughtCheating = false;
         this.stats.cheatCount = 0; // IMPORTANT: this will need to be updated during game play
         for(var i=0;i<this.numOfQuestions;i++) {
             var operation = RandomElement(this.listOfOperations);
             var pair = operation.generatePair(this.rangeLow,this.rangeHigh);
-            this.questions.push(new Question(pair.a,pair.b,operation));
+            var newQuestion = new Question(pair.a,pair.b,operation);
+            if(i >= this.questions.length) {
+                this.questions.push(newQuestion);
+                container.addChild(newQuestion.text);
+            } else {
+                this.questions[i].replaceWith(newQuestion);
+            }
         }
         //this.highestAnswer = Max(this.questions,function(a) { return a.correctAnswer; });
         //this.lowestAnswer  = Min(this.questions,function(a) { return a.correctAnswer; });
@@ -1196,20 +1243,50 @@ function initGameScene(container) {
         questions: [],
         currentQuestionIndex: 0,
         startingPos: new Vec2(50,50),
-        spacing: new Vec2(0,10)
+        spacing: new Vec2(0,10),
+        currentIndexGraphic: new createjs.Shape(),
+        updateCurrentGraphics: function() {
+            var pos = this.startingPos.add(this.spacing.mul(this.currentQuestionIndex));
+            copyXY(this.currentIndexGraphic,pos);
+        },
+        updateAllGraphics: function() {
+            for(var i=0;i<this.questions.length;i++) {
+                var pos = this.startingPos.add(this.spacing.mul(i));
+                this.questions[i].text.x = pos.x;
+                this.questions[i].text.x = pos.y;
+            }
+        
+            this.updateCurrentGraphics();
+        }
     };
+    questions.currentIndexGraphic.beginFill("#000").drawRect(0,0,5,5);
+    container.add(questions.currentIndexGraphic);
+    
+    
+    var currentCheatPercent = 100;
+    var cheatRange = 100;
+    var cheating = -1;
+    var questionsCheatedOne;
+    
+    var cheat1 = new createjs.Shape(); // TODO: i need buttons
+    var cheat2 = new createjs.Shape();
     
     GameStates.Game.enable = function() {
         backgroundMusic.setSoundFromString("GamePlay",true);
         //generate test
+        questionsCheatedOne = new HashSet();
         test = StockTests[difficulty];
-        test.generate();
+        test.generate(container);
         var cheats = [[],[]];
         for(var i=0;i<test.questions.length;i++) {
             cheats[0][i] = getCheat(test.questions[i],0.75);
             cheats[1][i] = getCheat(test.questions[i],0.75);
          }
-        //display teset
+        //display test
+        //reset collection
+        questions.currentIndexGraphic = 0;
+        questions.questions = test.questions;
+        questions.updateAllGraphics();
         
         timer.start();
     };
@@ -1224,16 +1301,48 @@ function initGameScene(container) {
     };
     
     GameStates.Game.update = function() {
-        
+        if(cheating>=0) {
+            if(Math.random() > currentCheatPercent) {
+                //caught!
+                //mark cheated
+                test.caughtCheating = true;
+                gameComplete();
+            }
+            
+            
+            currentCheatPercent -= 0.05;
+            currentCheatPercent = clamp(currentCheatPercent,0,cheatRange);
+        } else {
+            currentCheatPercent += 0.05;
+            currentCheatPercent = clamp(currentCheatPercent,0,cheatRange);
+        }
     };
+    
+    function startCheating(index) {
+        cheating = index;
+        questionsCheatedOne.add(questions.currentQuestionIndex);
+        //get image for cheating
+        //display
+    }
+    function stopCheating() {
+        cheating = -1;
+        //remove image if it exists
+    }
     
     GameStates.Game.disable = function() {
         timer.stop();
+        stopCheating();
     };
     
-    function gameComplete() {
+    function gameComplete(cheated) {
         timer.stop();
-        //play audio
+        if(!cheated) {
+            //play audio
+        }
+        test.updateStats();
+        test.stats.cheatCount += questionsCheatedOne.size();
+        //test.stats.points = ??? // do something
+        
         //fade screen
         //gen stats
     }
@@ -1254,14 +1363,7 @@ function initLocker(container) {
     
     var stickerStuckToMouse = null;
     
-    var lockerSpace = {
-        start: new Coord(),
-        end: new Coord(),
-        withinBounds: function(pos) {
-            var zeroBase = pos.sub(this.start);
-            
-        }
-    };
+    var lockerSpace = new Bounds(new Coord(0,0),new Coord(1,1)); // update
     
     function StickerClicked(cloneOfSticker) {
         stickerStuckToMouse = cloneOfSticker;
@@ -1287,6 +1389,10 @@ function initLocker(container) {
     function tryPlaceSticker() {
         if(stickerStuckToMouse !== null) {
             //if valid then spot place and charge points update disabled stickers
+            if(lockerSpace.withinBounds(mouse.pos)) {
+                globalStats.points += stickerStuckToMouse.cost;
+                stickerStuckToMouse = null;
+            }
             //if not ignore click
         }
     }
