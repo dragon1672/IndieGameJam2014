@@ -367,6 +367,23 @@ var FPS = 30;
         array.map(function(item) { ret.push(selector(item));});
         return ret;
     }
+    function clamp(src,low,high) {
+        src = Math.max(src,low);
+        src = Math.min(src,high);
+        return src;
+    }
+    function clampVec(src,low,high) {
+        var ret = new Coord();
+        ret.x = clamp(src.x,low,high);
+        ret.y = clamp(src.y,low,high);
+        return ret;
+    }
+    function round(num,perc) {
+        var pow = 1;
+        for(var i=0;i<perc;i++) pow *= 10;
+        num = Math.round(num * pow) / pow;
+        return num;
+    }
 //endregion
 
 //region loading files
