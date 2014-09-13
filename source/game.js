@@ -274,6 +274,7 @@ var FPS = 30;
             this.updateEvent.callAll(dt);
         };
         EventTimer.prototype.start = function() {
+            this.stop();
             this.timer.start();
             var instance = this;
             this._updateHandle = setInterval(function() {instance.update();},1/this.targetFPS * 1000);
@@ -287,6 +288,7 @@ var FPS = 30;
     }());
     var CountDownTimer = (function() {
         function CountDownTimer(time,loop) {
+            this.startTime = time;
             this.time = time;
             this.timer = new EventTimer(30);
             var instance = this;
@@ -312,8 +314,10 @@ var FPS = 30;
             }
         };
         CountDownTimer.prototype.start = function() {
+            this.time = this.startTime;
             this.timer.start();
         };
+        CountDownTimer.prototype.reset = CountDownTimer.prototype.start;
         return CountDownTimer;
     }());
     //endregion
@@ -1183,7 +1187,7 @@ var lastTest = null;
 
 function initGameScene(container) {
     
-    var timer = new Timer();
+    var timer = new CountDownTimer(1*60); // you have 1 minutes
     
     GameStates.Game.enable = function() {
         backgroundMusic.setSoundFromString("GamePlay",true);
