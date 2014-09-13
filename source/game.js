@@ -607,7 +607,7 @@ var spriteSheets = {
     teacher: null,
     makeButton:     function() { return (new createjs.Sprite(this.buttons));      },
     makeMiniButton: function() { return (new createjs.Sprite(this.miniButtons));  },
-    makeTeacher:    function() { return (new createjs.Sprite(this.makeSteacher)); }
+    makeTeacher:    function() { return (new createjs.Sprite(this.teacher)); }
 };
 
 
@@ -705,7 +705,7 @@ function initSprites() {
         images: [queue.getResult("TeacherAnimation")],
         frames: [[0,0,309,348,0,22.45,215.3],[0,0,309,348,0,22.45,215.3],[0,0,309,348,0,22.45,215.3],[0,0,309,348,0,22.45,215.3],[0,0,309,348,0,22.45,215.3],[309,0,309,351,0,22.45,218.3],[309,0,309,351,0,22.45,218.3],[309,0,309,351,0,22.45,218.3],[309,0,309,351,0,22.45,218.3],[618,0,309,347,0,22.45,214.3],[618,0,309,347,0,22.45,214.3],[618,0,309,347,0,22.45,214.3],[618,0,309,347,0,22.45,214.3],[618,0,309,347,0,22.45,214.3],[618,0,309,347,0,22.45,214.3],[0,351,309,308,0,22.45,175.3],[0,351,309,308,0,22.45,175.3],[0,351,309,308,0,22.45,175.3],[0,351,309,308,0,22.45,175.3],[0,351,309,308,0,22.45,175.3],[0,351,309,308,0,22.45,175.3],[0,351,309,308,0,22.45,175.3],[0,351,309,308,0,22.45,175.3],[0,351,309,308,0,22.45,175.3],[0,351,309,308,0,22.45,175.3],[0,351,309,308,0,22.45,175.3],[618,0,309,347,0,22.45,214.3],[618,0,309,347,0,22.45,214.3],[618,0,309,347,0,22.45,214.3],[618,0,309,347,0,22.45,214.3],[618,0,309,347,0,22.45,214.3],[618,0,309,347,0,22.45,214.3],[309,0,309,351,0,22.45,218.3],[309,0,309,351,0,22.45,218.3],[309,0,309,351,0,22.45,218.3],[309,0,309,351,0,22.45,218.3]],
         animations: {
-            playUp:   [0, 36, "play",0.5],
+            Play:   [0, 35, "Play",0.125],
         } 
     });
     
@@ -1262,10 +1262,6 @@ function initGameScene(container) {
     var timer = new CountDownTimer(1*60); // you have 1 minutes
     var test;
     
-    //questions.currentIndexGraphic.beginFill("#000").drawRect(0,0,5,5);
-    //container.add(questions.currentIndexGraphic);
-    
-    
     var currentCheatPercent = 100;
     var cheatRange = 100;
     var cheating = -1;
@@ -1273,6 +1269,15 @@ function initGameScene(container) {
     
     var cheat1 = new createjs.Shape(); // TODO: i need buttons
     var cheat2 = new createjs.Shape();
+    
+    var teacher = spriteSheets.makeTeacher();
+    teacher.gotoAndPlay("Play");
+    teacher.x = 600;
+    teacher.y = 140;
+    teacher.scaleX = 0.75;
+    teacher.scaleY = 0.75;
+    container.addChild(teacher);
+    
     
     GameStates.Game.enable = function() {
         backgroundMusic.setSoundFromString("GamePlay",true);
