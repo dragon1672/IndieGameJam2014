@@ -401,10 +401,27 @@ var FPS = 30;
                 instance.end.y   = instance.end.y   === null ? item.y : Math.max(instance.end.y,item.y);
             });
         }
+        
         Bounds.prototype.withinBounds = function(pos) {
             var zeroBased = pos.sub(this.start);
             var offset = this.end.sub(this.start);
             return pos.withinBox(offset);
+        };
+        Bounds.prototype.wrapWithinBounds = function(pos) {
+            var zeroBased = pos.sub(this.start);
+            var offset = this.end.sub(this.start);
+            return zeroBased.wrapByBox(offset).add(this.start);
+        };
+        Bounds.prototype.wrapWithinBounds = function(pos) {
+            var zeroBased = pos.sub(this.start);
+            var offset = this.end.sub(this.start);
+            return this.start.add(clampVec(zeroBased,offset.x,offset.y));
+        };
+        Bounds.prototype.randomPointInside = function() {
+            return new Vec2(
+                Rand(this.start.x,this.end.x),
+                Rand(this.start.y,this.end.y)
+            );
         };
         
         return Bounds;
@@ -456,10 +473,12 @@ var FPS = 30;
     }
     function generateRegButton(title) {
         return function(button,onClickMethod) {
+            onClickMethod = onClickMethod || function(){};
             button.gotoAndStop(title+"Up");
             button.on("click", function(e)    { createjs.Sound.play("tick"); onClickMethod(e);});
             button.on("mouseover", function() { createjs.Sound.play("tinyTick"); button.gotoAndStop(title+"Over"); });
             button.on("mouseout",  function() { button.gotoAndStop(title+"Up");   });
+            button.on("pressup",   function() { button.gotoAndStop(title+"Up");   });
             button.on("mousedown", function() { button.gotoAndStop(title+"Down"); });
             return button;
         };
@@ -468,7 +487,8 @@ var FPS = 30;
         generateRegButton(title)(btnPlay,onClickMethod);
         return btnPlay;
     }
-    function prettyUpSeconds(secs) {
+    function prettyUpSeconds(secs, spacer) {
+        spacer = spacer || " ";
         var breakup = [
             {val: 1,  suffix: ""},
             {val: 60, suffix: ":"},
@@ -489,7 +509,7 @@ var FPS = 30;
         var sep = "";
         for(i = data.length-1;i>=0;i--) {
             ret += sep+data[i] + breakup[i].suffix;
-            sep = " ";
+            sep = spacer;
         }
         return ret;
     }
