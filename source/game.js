@@ -106,6 +106,171 @@ var FPS = 30;
         return Coord;
     }());
 
+    //region hasy
+
+    /*
+     * Hash table developed by Anthony Corbin
+    //*/
+    var HashTable, HashMap;
+     HashTable = HashMap = (function() {
+        function HashTable() {
+            this.pairs = [];
+            this.orderedPairs = [];
+            this.numOfActiveIterations = 0;
+        }
+        function KeyValuePair(hash, key, val) {
+            this.hash = hash;
+            this.key = key;
+            this.val = val;
+            this.markedForDel = false;
+        }
+
+        var hasher = function (value) {
+            return (typeof value) + ' ' + (value instanceof Object ? (value.__hash || (value.__hash = ++arguments.callee.current)) : value.toString());
+        };
+        hasher.current = 0;
+
+        HashTable.prototype.hashObject = hasher;
+        KeyValuePair.prototype.containsKey = function (key) { return this.key === key; };
+        KeyValuePair.prototype.containsVal = function (val) { return this.val === val; };
+        HashTable.prototype.add = function (newKey, newVal) {
+            var hash = this.hashObject(newKey);
+            if (!this.containsKey(newKey)) {
+                this.pairs[hash] = new KeyValuePair(hash, newKey, newVal);
+                this.orderedPairs.push(this.pairs[hash]);
+            } else {
+                this.pairs[hash].val = newVal;
+            }
+        };
+        HashTable.prototype.put  = this.add;
+        HashTable.prototype.get = function (key) {
+            var hash = this.hashObject(key);
+            if (this.pairs[hash] !== null) { return this.pairs[hash].val; }
+            return null;
+        };
+        HashTable.prototype.remove = function (key) {
+            var i, hash;
+            if (this.containsKey(key)) {
+                hash = this.hashObject(key);
+                this.pairs[hash].markedForDel = true;
+                var potato = this;
+                var del = function del() {
+                    if(potato.numOfActiveIterations > 0) {
+                        setTimeout(del,10);
+                        return;
+                    }
+                    for (i = 0; i < potato.orderedPairs.length; i++) {
+                        if (potato.orderedPairs[i] === potato.pairs[hash]) {
+                            potato.orderedPairs.splice(i, 1);
+                            potato.pairs[hash] = null;
+                            return;
+                        }
+                    }
+                    throw new Error("contain returned true, but key not found");
+                };
+                del();
+            }
+        };
+        HashTable.prototype.containsKey = function (key) {
+            var hash = this.hashObject(key);
+            return (this.pairs[hash] && (this.pairs[hash] instanceof KeyValuePair)) ? true : false;
+        };
+        HashTable.prototype.containsValue = function (val) {
+            var ret = false;
+            this.orderedPairs.map(function (item) {
+                ret = ret || item.val === val;
+            });
+            return ret;
+        };
+        HashTable.prototype.isEmpty = function () { return this.size() === 0; };
+        HashTable.prototype.size = function () { return this.orderedPairs.length; };
+        //pass in function(key,val)
+        HashTable.prototype.foreachInSet = function (theirFunction) {
+            this.numOfActiveIterations++;
+            this.orderedPairs.map(function (item) {
+                if(!item.markedForDel) {
+                    theirFunction(item.key, item.val);
+                }
+            });
+            this.numOfActiveIterations--;
+        };
+        HashTable.prototype.map = HashTable.prototype.foreachInSet;
+        return HashTable;
+    }());
+
+    /*
+     * Hash Set developed by Anthony Corbin
+    //*/
+    var HashSet = (function() {
+        function HashSet() {
+            this.myTable = new HashTable();
+        }
+        HashSet.prototype.add      = function (val)      { return this.myTable.add(val, true);       };
+        HashSet.prototype.addAll   = function (vals)     { var potato = this; vals.map(function(item) { potato.myTable.add(item,true); }); };
+        HashSet.prototype.contains = function (toCheck)  { return this.myTable.containsKey(toCheck); };
+        HashSet.prototype.remove   = function (toRemove) { return this.myTable.remove(toRemove);     };
+        HashSet.prototype.size     = function ()         { return this.myTable.size(); };
+
+        HashSet.prototype.cross = function (that) {
+            var ret = new HashSet();
+            this.foreachInSet(function (a) {
+                that.foreachInSet(function (b) {
+                    var toAdd = {
+                        0: a,
+                        1: b,
+                    };
+                    ret.add(toAdd);
+                });
+            });
+            return ret;
+        };
+        HashSet.prototype.union = function (that) {
+            var ret = new HashSet();
+            this.foreachInSet(function (item) { ret.add(item); });
+            that.foreachInSet(function (item) { ret.add(item); });
+            return ret;
+        };
+        HashSet.prototype.join  = function (that) {
+            var ret = new HashSet();
+            this.myTable.foreachInSet(function (key, val) {
+                if (that.contains(key)) { ret.add(key); }
+            });
+            return ret;
+        };
+        HashSet.prototype.removeSet = function (that) {
+            that.foreachInSet(function(item) {
+                this.remove(item); 
+            });
+        };
+        HashSet.prototype.isEqual   = function (that) {
+            return this.isSubsetOf(that) && that.isSuperSet(this);
+        };
+        HashSet.prototype.isSubSet  = function (that) {
+            var ret = true;
+            this.myTable.foreachInSet(function (item) {
+                ret = ret && that.contains(item);
+            });
+            return ret;
+        };
+        HashSet.prototype.isSuperSet   = function (that) {
+            return that.isSubSet(this);
+        };
+        HashSet.prototype.foreachInSet = function (theirFunction) {
+            return this.myTable.foreachInSet(function(key,val) { theirFunction(key); });
+        };
+        HashSet.prototype.map = HashSet.prototype.foreachInSet;
+        HashSet.prototype.toList = function () {
+            var ret = [];
+            this.foreachInSet(function (item) {
+                ret.push(item);
+            });
+            return ret;
+        };
+        return HashSet;
+    })();
+
+    //endregion
+
     //will have to make and manager per scene
     var KeyStateManager = (function(){
         function KeyStateManager(KEYCODE) {
@@ -829,40 +994,6 @@ function initLoadingScreen() {
 //endregion
 
 //region GAMEOBJECT
-//region copy pasted code
-
-function Where(theArray, condition) {
-    var ret = [];
-    theArray.map(function(item) { if(condition(item)) { ret.push(item); }});
-    return ret;
-}
-function Rand(min,max) {
-    return Math.round(Math.random() * (max - min) + min);
-}
-function RandomElement(array) {
-    return array[Rand(0,array.length-1)];
-}
-function SingleSelect(array,selector) {
-    selector = selector || function(a,b) { return a > b ? a : b; };
-    var ret = null;
-	var first = true;
-    array.map(function(item) {
-		ret = first ? item : selector(item,ret);
-		first = false;
-	});
-    return ret;
-}
-function Max(array) { return SingleSelect(array,function(a,b) { return a > b ? a : b; }); }
-function Min(array) { return SingleSelect(array,function(a,b) { return a < b ? a : b; }); }
-function Sum(array) { return SingleSelect(array,function(a,b) { return a + b; }); }
-function Select(array,selector) {
-    selector = selector || function(item) { return item; };
-    var ret = [];
-    array.map(function(item) { ret.push(selector(item));});
-    return ret;
-}
-
-//endregion
 
 //region hasy
 
