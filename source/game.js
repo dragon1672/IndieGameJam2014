@@ -800,7 +800,14 @@ function initSprites() {
     
     spriteSheets.teacher = new createjs.SpriteSheet({
         images: [queue.getResult("TeacherAnimation")],
-        frames: [[0,0,309,348,0,22.45,215.3],[0,0,309,348,0,22.45,215.3],[0,0,309,348,0,22.45,215.3],[0,0,309,348,0,22.45,215.3],[0,0,309,348,0,22.45,215.3],[309,0,309,351,0,22.45,218.3],[309,0,309,351,0,22.45,218.3],[309,0,309,351,0,22.45,218.3],[309,0,309,351,0,22.45,218.3],[618,0,309,347,0,22.45,214.3],[618,0,309,347,0,22.45,214.3],[618,0,309,347,0,22.45,214.3],[618,0,309,347,0,22.45,214.3],[618,0,309,347,0,22.45,214.3],[618,0,309,347,0,22.45,214.3],[0,351,309,308,0,22.45,175.3],[0,351,309,308,0,22.45,175.3],[0,351,309,308,0,22.45,175.3],[0,351,309,308,0,22.45,175.3],[0,351,309,308,0,22.45,175.3],[0,351,309,308,0,22.45,175.3],[0,351,309,308,0,22.45,175.3],[0,351,309,308,0,22.45,175.3],[0,351,309,308,0,22.45,175.3],[0,351,309,308,0,22.45,175.3],[0,351,309,308,0,22.45,175.3],[618,0,309,347,0,22.45,214.3],[618,0,309,347,0,22.45,214.3],[618,0,309,347,0,22.45,214.3],[618,0,309,347,0,22.45,214.3],[618,0,309,347,0,22.45,214.3],[618,0,309,347,0,22.45,214.3],[309,0,309,351,0,22.45,218.3],[309,0,309,351,0,22.45,218.3],[309,0,309,351,0,22.45,218.3],[309,0,309,351,0,22.45,218.3]],
+        frames: [[0,0,309,348,0,22.45,215.3],[0,0,309,348,0,22.45,215.3],[0,0,309,348,0,22.45,215.3],[0,0,309,348,0,22.45,215.3],
+                 [0,0,309,348,0,22.45,215.3],[309,0,309,351,0,22.45,218.3],[309,0,309,351,0,22.45,218.3],[309,0,309,351,0,22.45,218.3],
+                 [309,0,309,351,0,22.45,218.3],[618,0,309,347,0,22.45,214.3],[618,0,309,347,0,22.45,214.3],[618,0,309,347,0,22.45,214.3],[618,0,309,347,0,22.45,214.3],[618,0,309,347,0,22.45,214.3],
+                 [618,0,309,347,0,22.45,214.3],[0,351,309,308,0,22.45,175.3],[0,351,309,308,0,22.45,175.3],[0,351,309,308,0,22.45,175.3],[0,351,309,308,0,22.45,175.3],[0,351,309,308,0,22.45,175.3],
+                 [0,351,309,308,0,22.45,175.3],[0,351,309,308,0,22.45,175.3],[0,351,309,308,0,22.45,175.3],[0,351,309,308,0,22.45,175.3],[0,351,309,308,0,22.45,175.3],[0,351,309,308,0,22.45,175.3],
+                 [618,0,309,347,0,22.45,214.3],[618,0,309,347,0,22.45,214.3],[618,0,309,347,0,22.45,214.3],[618,0,309,347,0,22.45,214.3],[618,0,309,347,0,22.45,214.3],[618,0,309,347,0,22.45,214.3],
+                 [309,0,309,351,0,22.45,218.3],
+                 [309,0,309,351,0,22.45,218.3],[309,0,309,351,0,22.45,218.3],[309,0,309,351,0,22.45,218.3]],
         animations: {
             Play:   [0, 35, "Play",0.125],
         } 
@@ -1679,9 +1686,9 @@ function initLocker(container) {
     });
     
     function StickerClicked(cloneOfSticker) {
-        if(globalStats.points >= cloneOfSticker.cost)
+        if(globalStats.points >= cloneOfSticker.cost && cloneOfSticker.isUnlocked(globalStats))
         {
-            cloneOfSticker.graphic.scaleX = cloneOfSticker.graphic.scaleY = 0.25;
+            cloneOfSticker.graphic.scaleX = cloneOfSticker.graphic.scaleY = 0.4;
             container.addChild(cloneOfSticker.graphic); // required?
             //buying sticker
             globalStats.points -= cloneOfSticker.cost;
@@ -1721,13 +1728,14 @@ function initLocker(container) {
         
         //setup stats
         displayOfStats[0].txt.text = "Cheated \n"  +  globalStats.cheatCount  + " times";
-        displayOfStats[1].txt.text = "Caught  \n"  +  globalStats.timesCaught + " times";
+        displayOfStats[1].txt.text = globalStats.timesCaught + " times\ncaught";
         displayOfStats[2].txt.text = "Grade:  \n"  +  globalStats.grade().letter        ;
-        displayOfStats[3].txt.text = "Taken:  \n"  +  globalStats.numOfTests  + " tests";
-        displayOfStats[4].txt.text = "Points: \n"  +  globalStats.points    +   " tests";
+        displayOfStats[3].txt.text = globalStats.numOfTests+" tests\ntaken";
+        displayOfStats[4].txt.text = globalStats.points+" points";
         var statsBounds = new Bounds(new Vec2(25,76),new Vec2(250,340));
         var placed = new HashSet();
         var toPlace = new HashSet(displayOfStats);
+        toPlace.remove(displayOfStats[4]);
         while(toPlace.size() > 0) {
             toPlace.map(function(item) {
                 var pos = statsBounds.randomPointInside();
@@ -1746,6 +1754,9 @@ function initLocker(container) {
                 }
             });
         }
+        var pos = new Vec2(192,36);
+        copyXY(displayOfStats[4].txt,pos);
+        copyXY(displayOfStats[4].back,pos);
             
             
             
@@ -1765,8 +1776,8 @@ function initLocker(container) {
         store.shapes.btnR.x = stage.canvas.width - 11 - store.shapes.btnR.getBounds().width * 1.5;
         store.shapes.btnR.y = 420 + store.shapes.btnR.getBounds().height / 2;
 
-        container.addChild(store.shapes.btnL);
-        container.addChild(store.shapes.btnR);
+        store.shapes.title.x = 120;
+        store.shapes.title.y = 410;
     };
     
     
@@ -1775,6 +1786,7 @@ function initLocker(container) {
         elementsPerPage: 3,
         padding: new Vec2(30,0),
         shapes: {
+            title: new createjs.Text("Sticker Store","bold 36px Arial", "#FF0"),
             btnL: CreateButtonFromSprite(spriteSheets.makeArrows(),"left",   function() { store.currentPage--; store.update();}),
             btnR: CreateButtonFromSprite(spriteSheets.makeArrows(),"right",  function() { store.currentPage++; store.update();}),
             pool: (function(){
@@ -1801,16 +1813,20 @@ function initLocker(container) {
                     this.shapes.pool[i].img = allStickers[index].graphic;
                     if(allStickers[index].isUnlocked(globalStats)) {
                         if(globalStats.points >= allStickers[index].cost) {
-                            this.shapes.pool[i].txt.text = "Buy: "+allStickers[index].cost;
+                            this.shapes.pool[i].txt.text = ""+allStickers[index].cost;
+                            this.shapes.pool[i].txt.color = "#0F0";
                         } else {
-                            this.shapes.pool[i].txt.text = "To Expensive: "+allStickers[index].cost;
+                            this.shapes.pool[i].txt.text = ""+allStickers[index].cost;
+                            this.shapes.pool[i].txt.color = "#A00";
+                            
                         }
                     } else {
                         this.shapes.pool[i].txt.text = "Locked!";
+                        this.shapes.pool[i].txt.color = "#FB5";
                     }
                     this.shapes.pool[i].img.visible = true;
                     this.shapes.pool[i].txt.visible = true;
-                    var start = new Vec2(200,500);
+                    var start = new Vec2(240,500);
                     var padding = new Vec2((stage.canvas.width-start.x * 2) / this.elementsPerPage,0).mul(i);
                     copyXY(this.shapes.pool[i].img,start.add(padding));
                     copyXY(this.shapes.pool[i].txt,start.add(padding).add(new Vec2(-this.shapes.pool[i].txt.getBounds().width/2,50)));
@@ -1821,6 +1837,9 @@ function initLocker(container) {
             }
         },
     };
+    container.addChild(store.shapes.btnL);
+    container.addChild(store.shapes.btnR);
+    container.addChild(store.shapes.title);
     
     
     
