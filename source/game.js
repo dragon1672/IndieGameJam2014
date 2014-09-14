@@ -1649,29 +1649,21 @@ function initLocker(container) {
     homeButton.x = homeButton.y = 40;
     homeButton.x += 30;
     
-    var statBackground = new createjs.Shape(new createjs.Graphics().beginFill("#0FF").drawRect(0,0,70,70));
+    var statBackground = new createjs.Shape(new createjs.Graphics().beginFill("#0FF").drawRect(-5,-5,75,45));
     
     var displayOfStats = [
-        { txt: new createjs.Text("Cheated "     +     globalStats.cheatCount  + " times","bold italic 35px Rage", "#999"), back: statBackground.clone() },
-        { txt: new createjs.Text("Caught cheating " + globalStats.timesCaught + " times","bold italic 35px Rage", "#999"), back: statBackground.clone() },
-        { txt: new createjs.Text("Grade: "      +     globalStats.grade().letter,        "bold italic 35px Rage", "#999"), back: statBackground.clone() },
-        { txt: new createjs.Text("Taken: "      +     globalStats.numOfTests  + " tests","bold italic 35px Rage", "#999"), back: statBackground.clone() },
-        { txt: new createjs.Text("Total Points: "  +  globalStats.points    +   " tests","bold italic 35px Rage", "#999"), back: statBackground.clone() },
+    /* 0 */ { txt: new createjs.Text("","bold 16px Arial", "#FFF"), back: statBackground.clone() },
+    /* 1 */ { txt: new createjs.Text("","bold 16px Arial", "#FFF"), back: statBackground.clone() },
+    /* 2 */ { txt: new createjs.Text("","bold 16px Arial", "#FFF"), back: statBackground.clone() },
+    /* 3 */ { txt: new createjs.Text("","bold 16px Arial", "#FFF"), back: statBackground.clone() },
+    /* 4 */ { txt: new createjs.Text("","bold 16px Arial", "#FFF"), back: statBackground.clone() }
     ];
-    
-    function statDisplay(title,data, x,y) {
-        this.title = title;
-        this.data  = data;
-        this.backgroundGraphic = new createjs.Shape();
-        this.text = new createjs.Text(title+"\n"+data,"bold italic 35px Rage", "#999");
-        
-        var pos = new Vec2(x,y);
-        copyXY(this.backgroundGraphic,pos);
-        copyXY(this.text,pos);
-        
-        container.addChild(this.backgroundGraphic);
-        container.addChild(this.text);
-    }
+    displayOfStats.map(function(item) {
+       container.addChild(item.back);
+    });
+    displayOfStats.map(function(item) {
+       container.addChild(item.txt);
+    });
     
     function StickerClicked(cloneOfSticker) {
         if(globalStats.points >= cloneOfSticker.cost) {
@@ -1700,6 +1692,45 @@ function initLocker(container) {
     
     GameStates.Locker.enable = function() {
         backgroundMusic.setSoundFromString("GamePlay",true);
+        
+        //setup stats
+        displayOfStats[0].txt.text = "Cheated \n"  +  globalStats.cheatCount  + " times";
+        displayOfStats[1].txt.text = "Caught  \n"  +  globalStats.timesCaught + " times";
+        displayOfStats[2].txt.text = "Grade:  \n"  +  globalStats.grade().letter        ;
+        displayOfStats[3].txt.text = "Taken:  \n"  +  globalStats.numOfTests  + " tests";
+        displayOfStats[4].txt.text = "Points: \n"  +  globalStats.points    +   " tests";
+        var statsBounds = new Bounds(new Vec2(25,76),new Vec2(250,340));
+        var placed = new HashSet();
+        var toPlace = new HashSet(displayOfStats);
+        while(toPlace.size() > 0) {
+            toPlace.map(function(item) {
+                var pos = statsBounds.randomPointInside();
+                var valid = true;
+                placed.map(function(item) {
+                    var diff = pos.sub(item);
+                    if(diff.lengthSquared() < 95*95) {
+                        valid = false;
+                        console.log("redo");
+                    }
+                });
+                copyXY(item.txt,pos);
+                copyXY(item.back,pos);
+                if(valid) {
+                    placed.add(pos);
+                    toPlace.remove(item);
+                }
+            });
+        }
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
         
         //setup stickers
         var oldStickers = new HashSet(validStickers.toList());
