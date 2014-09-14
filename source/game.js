@@ -967,8 +967,7 @@ function init() {
     //init start
     {
         GameStates.StartScreen.enable = function() {
-            var musicIndex = Math.floor(globalStats.numOfQuestions() > 0 ? clamp((globalStats.cheatCount / globalStats.numOfQuestions())*moodyMusic.length,0,moodyMusic.length-1) : moodyMusic.length / 2);
-            backgroundMusic.setSoundFromString(moodyMusic[musicIndex],true);
+            playMoody();
         };
         var BTN = [];
         BTN.push(CreateButtonFromSprite(spriteSheets.makeButton(),"play",    function() { CurrentGameState = GameStates.Game;}));
@@ -1397,6 +1396,10 @@ var moodyMusic = [
     "Neg1",
     "Neg2" // really bad
 ];
+function playMoody() {
+    var musicIndex = Math.floor(globalStats.numOfQuestions() > 0 ? clamp((globalStats.cheatCount / globalStats.numOfQuestions())*moodyMusic.length,0,moodyMusic.length-1) : moodyMusic.length / 2);
+    backgroundMusic.setSoundFromString(moodyMusic[musicIndex],true);
+}
 
 function initGameScene(container) {
     var screenCover = new createjs.Shape();
@@ -1536,8 +1539,7 @@ function initGameScene(container) {
     
     GameStates.Game.enable = function() {
         onceShot = true;
-        var musicIndex = Math.floor(globalStats.numOfQuestions() > 0 ? clamp((globalStats.cheatCount / globalStats.numOfQuestions())*moodyMusic.length,0,moodyMusic.length-1) : moodyMusic.length / 2);
-        backgroundMusic.setSoundFromString(moodyMusic[musicIndex],true);
+        playMoody();
         //generate test
         questions.currentQuestionIndex = 0;
         questionsCheatedOn = new HashSet();
@@ -1596,12 +1598,11 @@ function initGameScene(container) {
         stopCheating();
     };
     var onceShot = true;
-    function gameComplete(cheated) {
+    function gameComplete() {
         if(onceShot) {
             onceShot = false;
             timer.stop();
             test.updateStats();
-            test.stats.cheatCount += questionsCheatedOn.size();
             if(test.stats.timesCaught === 0) {
                 createjs.Sound.play("PencilsDown");
                 var grade = test.stats.grade();
@@ -1616,7 +1617,12 @@ function initGameScene(container) {
                 }
             } else {
                 createjs.Sound.play("cheater");
+                for(var i =0;i<test.questions.length;i++) {
+                    questionsCheatedOn.add(i);
+                }
             }
+            
+            test.stats.cheatCount += questionsCheatedOn.size();
             lastTest = test;
             globalStats = globalStats.add(test.stats);
             var blackOutTimer = new CountDownTimer(2);
@@ -1740,9 +1746,7 @@ function initLocker(container) {
     });
     
     GameStates.Locker.enable = function() {
-        var musicIndex = Math.floor(globalStats.numOfQuestions() > 0 ? clamp((globalStats.cheatCount / globalStats.numOfQuestions())*moodyMusic.length,0,moodyMusic.length-1) : moodyMusic.length / 2);
-        
-        backgroundMusic.setSoundFromString(moodyMusic[musicIndex],true);
+        playMoody();
         
         //setup stats
         displayOfStats[0].txt.text = "Cheated \n"  +  globalStats.cheatCount  + " times";
