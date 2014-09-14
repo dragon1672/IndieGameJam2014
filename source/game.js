@@ -587,6 +587,7 @@ var manifest = [
     {src:"audio/moralMathNegative1.wav", id:"Neg1"},
     {src:"audio/moralMathNegative2.wav", id:"Neg2"},
     {src:"audio/PencilsDownYoung.wav", id:"PencilsDown"},
+    {src:"audio/cheater.mp3", id:"cheater"},
     {src:"images/buttons.png", id:"button"},
     {src:"images/wideStickyNote.png", id:"wideStickyNote"},
     {src:"images/miniButtons.png", id:"miniButton"},
@@ -1601,7 +1602,7 @@ function initGameScene(container) {
             timer.stop();
             test.updateStats();
             test.stats.cheatCount += questionsCheatedOn.size();
-            if(!cheated) {
+            if(test.stats.timesCaught != 0) {
                 createjs.Sound.play("PencilsDown");
                 var grade = test.stats.grade();
                 if(grade.letter.charAt(0) === "A") {
@@ -1613,6 +1614,8 @@ function initGameScene(container) {
                 } else if(grade.letter.charAt(0) === "D") {
                     test.stats.points += 1;
                 }
+            } else {
+                createjs.Sound.play("cheater");
             }
             lastTest = test;
             globalStats = globalStats.add(test.stats);
