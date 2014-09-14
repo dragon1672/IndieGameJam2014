@@ -1350,7 +1350,7 @@ var allStickers = []; // set this somehow
 
 var myLocker = {
     myStickers: new HashSet(),
-    bounds: new Bounds(new Coord(420,0),new Coord(650,370)), // update
+    bounds: new Bounds(new Coord(420,0),new Coord(660,370)), // update
 };
 
 var globalStats = new Stats();
@@ -1670,6 +1670,7 @@ function initLocker(container) {
     function StickerClicked(cloneOfSticker) {
         //if(globalStats.points >= cloneOfSticker.cost)
         {
+            cloneOfSticker.graphic.scaleX = cloneOfSticker.graphic.scaleY = 0.25;
             container.addChild(cloneOfSticker.graphic); // required?
             //buying sticker
             globalStats.points += cloneOfSticker.cost;
@@ -1694,10 +1695,11 @@ function initLocker(container) {
     
     allStickers.map(function(item) {
         item.graphic.x = item.graphic.y = 100;
-        item.graphic.scaleX = item.graphic.scaleY = 0.25;
+        item.graphic.scaleX = item.graphic.scaleY = 0.5;
         item.graphic.regX = item.graphic.getBounds().width / 2;
         item.graphic.regY = item.graphic.getBounds().height / 2;
         item.graphic.on("click",function() { StickerClicked(item.clone()); });
+        //item.graphic.visible = false;
         container.addChild(item.graphic);
     });
     
