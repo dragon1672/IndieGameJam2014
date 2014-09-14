@@ -1661,7 +1661,7 @@ function initLocker(container) {
             toAdd = new Sticker();
             toAdd.graphic = new loadImage("badStick"+i);
             toAdd.cost = i*2 + 1;
-            toAdd.isUnlocked = cheatCount(i/2);
+            toAdd.isUnlocked = cheatCount(i*3);
 
             allStickers.push(toAdd);
         }
@@ -1670,7 +1670,7 @@ function initLocker(container) {
             toAdd = new Sticker();
             toAdd.graphic = new loadImage("goodStick"+i);
             toAdd.cost = i*2 + 1;
-            toAdd.isUnlocked = testCount(i/2);
+            toAdd.isUnlocked = testCount(i*3);
 
             allStickers.push(toAdd);
         }
@@ -1822,22 +1822,27 @@ function initLocker(container) {
         update: function() {
             this.shapes.btnL.visible = this.currentPage > 0;
             this.shapes.btnR.visible = (this.currentPage+1)*this.elementsPerPage < allStickers.length;
+            var masterListBuilder = new HashSet();
+            var masterList = [];
             allStickers.map(function(item) {
                 item.graphic.visible = false;
             });
+            masterListBuilder.addAll(Where(allStickers,function(item){ return  item.isUnlocked(globalStats); }));
+            masterListBuilder.addAll(Where(allStickers,function(item){ return !masterListBuilder.contains(item); }));
+            masterList = masterListBuilder.toList();
             for(var i=0;i<this.elementsPerPage;i++) {
                 var index = this.currentPage * this.elementsPerPage + i;
                 //hide the old
                 if(this.shapes.pool[i].img !== null) this.shapes.pool[i].img.visible = false;
                 
-                if(index < allStickers.length) {
-                    this.shapes.pool[i].img = allStickers[index].graphic;
-                    if(allStickers[index].isUnlocked(globalStats)) {
-                        if(globalStats.points >= allStickers[index].cost) {
-                            this.shapes.pool[i].txt.text = ""+allStickers[index].cost;
+                if(index < masterList.length) {
+                    this.shapes.pool[i].img = masterList[index].graphic;
+                    if(masterList[index].isUnlocked(globalStats)) {
+                        if(globalStats.points >= masterList[index].cost) {
+                            this.shapes.pool[i].txt.text = ""+masterList[index].cost;
                             this.shapes.pool[i].txt.color = "#0F0";
                         } else {
-                            this.shapes.pool[i].txt.text = ""+allStickers[index].cost;
+                            this.shapes.pool[i].txt.text = ""+masterList[index].cost;
                             this.shapes.pool[i].txt.color = "#A00";
                             
                         }
