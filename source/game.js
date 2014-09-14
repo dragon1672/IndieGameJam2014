@@ -572,7 +572,7 @@ var FPS = 30;
 var manifest = [
     {src:"audio/Loading.mp3", id:"Loading"},
     {src:"images/Static/Title.png", id:"title"},
-    {src:"images/Static/locker.png", id:"locker"}, // asdfadsf
+    {src:"images/Static/locker.png", id:"locker"},
     {src:"images/Static/GameScene.png", id:"GameScene"},
     {src:"images/Static/Instructions.png", id:"instructions"},
     {src:"images/Static/GameOver.png", id:"GameOver"},
@@ -595,6 +595,33 @@ var manifest = [
     {src:"audio/Fizzle.mp3", id:"fizzle"},
     {src:"audio/ForJamie.mp3", id:"Friday"},
     {src:"audio/moralMathTheme.wav", id:"StartScreen"},
+    //all dem stickers
+    {src:"images/stickers/bad/badSticker0.png", id:"badStick0"},
+    {src:"images/stickers/bad/badSticker1.png", id:"badStick1"},
+    {src:"images/stickers/bad/badSticker2.png", id:"badStick2"},
+    {src:"images/stickers/bad/badSticker3.png", id:"badStick3"},
+    {src:"images/stickers/bad/badSticker4.png", id:"badStick4"},
+    {src:"images/stickers/bad/badSticker5.png", id:"badStick5"},
+    {src:"images/stickers/bad/badSticker6.png", id:"badStick6"},
+    {src:"images/stickers/bad/badSticker7.png", id:"badStick7"},
+    {src:"images/stickers/bad/badSticker8.png", id:"badStick8"},
+    //good
+    {src:"images/stickers/good/goodSticker0.png",  id:"goodStick0" },
+    {src:"images/stickers/good/goodSticker1.png",  id:"goodStick1" },
+    {src:"images/stickers/good/goodSticker2.png",  id:"goodStick2" },
+    {src:"images/stickers/good/goodSticker3.png",  id:"goodStick3" },
+    {src:"images/stickers/good/goodSticker4.png",  id:"goodStick4" },
+    {src:"images/stickers/good/goodSticker5.png",  id:"goodStick5" },
+    {src:"images/stickers/good/goodSticker6.png",  id:"goodStick6" },
+    {src:"images/stickers/good/goodSticker7.png",  id:"goodStick7" },
+    {src:"images/stickers/good/goodSticker8.png",  id:"goodStick8" },
+    {src:"images/stickers/good/goodSticker9.png",  id:"goodStick9" },
+    {src:"images/stickers/good/goodSticker10.png", id:"goodStick10"},
+    {src:"images/stickers/good/goodSticker11.png", id:"goodStick11"},
+    {src:"images/stickers/good/goodSticker12.png", id:"goodStick12"},
+    {src:"images/stickers/good/goodSticker13.png", id:"goodStick13"},
+    {src:"images/stickers/good/goodSticker14.png", id:"goodStick14"},
+    {src:"images/stickers/good/goodSticker15.png", id:"goodStick15"},
 ];
 
 var queue;
@@ -867,6 +894,7 @@ if (!!(window.addEventListener)) {
 function init() {
     GameStates.StartScreen.container.addChild(  loadImage("title")        );
     GameStates.Game.container.addChild(         loadImage("GameScene")    );
+    GameStates.Locker.container.addChild(       loadImage("locker")    );
     GameStates.Instructions.container.addChild( loadImage("instructions") );
     GameStates.Credits.container.addChild(      loadImage("credits")  );
     GameStates.GameOver.container.addChild(     loadImage("GameOver") );
@@ -1319,7 +1347,7 @@ var allStickers = []; // set this somehow
 
 var myLocker = {
     myStickers: new HashSet(),
-    bounds: new Bounds(new Coord(0,0),new Coord(1,1)), // update
+    bounds: new Bounds(new Coord(400,0),new Coord(700,400)), // update
 };
 
 var globalStats = new Stats();
@@ -1341,6 +1369,36 @@ var moodyMusic = [
 ];
 
 function initGameScene(container) {
+    //region init stickers
+    (function(){
+        var i, toAdd;
+        function cheatCount(level) {
+            return function(stat) {return stat.cheatCount >= level;};
+        }
+        function testCount(level) {
+            return function(stat) {return stat.numOfTests >= level;};
+        }
+        //bad
+        for(i = 0; i<9;i++) {
+            toAdd = new Sticker();
+            toAdd.graphic = new loadImage("badStick"+i);
+            toAdd.cost = i*2;
+            toAdd.isUnlocked = cheatCount(i/2);
+
+            allStickers.push(toAdd);
+        }
+        //good
+        for(i = 0; i<16;i++) {
+            toAdd = new Sticker();
+            toAdd.graphic = new loadImage("goodStick"+i);
+            toAdd.cost = i*2;
+            toAdd.isUnlocked = testCount(i/2);
+
+            allStickers.push(toAdd);
+        }
+    }());
+    //endregion
+    
     
     var screenCover = new createjs.Shape();
     screenCover.graphics.beginFill("#000").drawRect(0, 0, stage.canvas.width, stage.canvas.height);
@@ -1365,39 +1423,46 @@ function initGameScene(container) {
     var cheats;
     var cheatOverlay = new createjs.Shape();
     var cheatText = new createjs.Text("Cheater!","italic 20px Arial", "#888");
-    container.addChild(cheatText);
-    
-    cheatOverlay.graphics.beginFill("#F00").drawRect(204, 225, 380, 600);
-    container.addChild(cheatOverlay);
     
     var cheat1 = CreateButtonFromSprite(spriteSheets.makeButton(),"cheat"); cheat1.on("pressup",stopCheating); cheat1.on("mousedown",function() {startCheating(0);});
     var cheat2 = CreateButtonFromSprite(spriteSheets.makeButton(),"cheat"); cheat2.on("pressup",stopCheating); cheat2.on("mousedown",function() {startCheating(1);});
-    
-    cheat1.scaleX = 0.6;    cheat1.scaleY = 0.6;
-    cheat2.scaleX = 0.6;    cheat2.scaleY = 0.6;
-    
-    copyXY(cheat1,new Vec2(100,280));
-    copyXY(cheat2,new Vec2(700,280));
-    
-    container.addChild(cheat1);
-    container.addChild(cheat2);
-    
     var timeLeft = new createjs.Text("[time left]","25px EraserRegular","#fff");
-    copyXY(timeLeft,new Vec2(70,60));
-    container.addChild(timeLeft);
-    
-    timer.timer.updateEvent.addCallBack(function() {
-        timeLeft.text = "Time Left: "+prettyUpSeconds(timer.getTimeLeft(),"");
-    });
-    
-    //teacher
     var teacher = spriteSheets.makeTeacher();
-    teacher.gotoAndPlay("Play");
-    teacher.x = 600;
-    teacher.y = 140;
-    teacher.scaleX = 0.75;
-    teacher.scaleY = 0.75;
-    container.addChild(teacher);
+    // adding junk to container
+    (function(){
+        cheat1.scaleX = 0.6;    cheat1.scaleY = 0.6;
+        cheat2.scaleX = 0.6;    cheat2.scaleY = 0.6;
+
+        copyXY(cheat1,new Vec2(100,280));
+        copyXY(cheat2,new Vec2(700,280));
+
+        container.addChild(cheat1);
+        container.addChild(cheat2);
+
+        container.addChild(cheatText);
+
+        cheatOverlay.graphics.beginFill("#F00").drawRect(204, 225, 380, 600);
+        container.addChild(cheatOverlay);
+    
+
+
+        copyXY(timeLeft,new Vec2(70,60));
+        container.addChild(timeLeft);
+
+        timer.timer.updateEvent.addCallBack(function() {
+            timeLeft.text = "Time Left: "+prettyUpSeconds(timer.getTimeLeft(),"");
+        });
+        //teacher
+
+        teacher.gotoAndPlay("Play");
+        teacher.x = 600;
+        teacher.y = 140;
+        teacher.scaleX = 0.75;
+        teacher.scaleY = 0.75;
+        container.addChild(teacher);
+    }());
+    
+    
 
     
     function Choice(x,y) {
