@@ -1688,6 +1688,7 @@ function initLocker(container) {
     function StickerClicked(cloneOfSticker) {
         if(globalStats.points >= cloneOfSticker.cost && cloneOfSticker.isUnlocked(globalStats))
         {
+            createjs.Sound.play("kaching");
             cloneOfSticker.graphic.scaleX = cloneOfSticker.graphic.scaleY = 0.4;
             container.addChild(cloneOfSticker.graphic); // required?
             //buying sticker
@@ -1710,6 +1711,8 @@ function initLocker(container) {
             myLocker.myStickers.add(cloneOfSticker);
             displayOfStats[4].txt.text = "Points: \n"  +  globalStats.points    +   " tests";
             store.update();
+        } else {
+            createjs.Sound.play("fizzle");
         }
     }
     
