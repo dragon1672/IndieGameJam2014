@@ -587,7 +587,7 @@ var manifest = [
     {src:"audio/moralMathNegative1.wav", id:"Neg1"},
     {src:"audio/moralMathNegative2.wav", id:"Neg2"},
     {src:"audio/PencilsDownYoung.wav", id:"PencilsDown"},
-    {src:"audio/cheater.mp3", id:"cheater"},
+    {src:"audio/cheater.wav", id:"cheater"},
     {src:"images/buttons.png", id:"button"},
     {src:"images/wideStickyNote.png", id:"wideStickyNote"},
     {src:"images/miniButtons.png", id:"miniButton"},
@@ -682,7 +682,7 @@ var backgroundMusic = {
         this.disable();
         this._src = null;
         this._enabled = temp;
-        this._lastStr = null;;
+        this._lastStr = null;
     },
     
 };
@@ -1602,7 +1602,7 @@ function initGameScene(container) {
             timer.stop();
             test.updateStats();
             test.stats.cheatCount += questionsCheatedOn.size();
-            if(test.stats.timesCaught != 0) {
+            if(test.stats.timesCaught === 0) {
                 createjs.Sound.play("PencilsDown");
                 var grade = test.stats.grade();
                 if(grade.letter.charAt(0) === "A") {
@@ -1796,6 +1796,9 @@ function initLocker(container) {
 
         store.shapes.title.x = 120;
         store.shapes.title.y = 410;
+        
+        store.shapes.key.x = 120;
+        store.shapes.key.y = 550;
     };
     
     
@@ -1805,6 +1808,7 @@ function initLocker(container) {
         padding: new Vec2(30,0),
         shapes: {
             title: new createjs.Text("Sticker Store","bold 36px Arial", "#FF0"),
+            key:   new createjs.Text("Cost","16px Arial", "#FF0"),
             btnL: CreateButtonFromSprite(spriteSheets.makeArrows(),"left",   function() { store.currentPage--; store.update();}),
             btnR: CreateButtonFromSprite(spriteSheets.makeArrows(),"right",  function() { store.currentPage++; store.update();}),
             pool: (function(){
@@ -1858,6 +1862,7 @@ function initLocker(container) {
     container.addChild(store.shapes.btnL);
     container.addChild(store.shapes.btnR);
     container.addChild(store.shapes.title);
+    container.addChild(store.shapes.key);
     
     
     
