@@ -577,6 +577,7 @@ var manifest = [
     {src:"images/Static/locker.png", id:"locker"},
     {src:"images/Static/GameScene.png", id:"GameScene"},
     {src:"images/Static/Instructions.png", id:"instructions"},
+    {src:"images/triangleButtons.png", id:"triangleButtons"},
     {src:"images/Static/GameOver.png", id:"GameOver"},
     {src:"images/Static/Credits.png", id:"credits"},
     {src:"audio/moralMathTheme.wav", id:"Failure"},
@@ -682,11 +683,16 @@ var spriteSheets = {
     buttons: null,
     miniButtons: null,
     levelButtons: null,
+    arrowButtons: null,
     teacher: null,
     makeButton:     function() { return (new createjs.Sprite(this.buttons));      },
     makeMiniButton: function() { return (new createjs.Sprite(this.miniButtons));  },
-    makeTeacher:    function() { return (new createjs.Sprite(this.teacher)); }
+    makeTeacher:    function() { return (new createjs.Sprite(this.teacher));      },
+    makeArrows:     function() {
+    return (new createjs.Sprite(this.arrowButtons));
+    }
 };
+
 
 
 function loadImage(key) {
@@ -776,6 +782,18 @@ function initSprites() {
         dummyp:       [18, 18, "dummyUp"  ],
         dummyver:     [19, 19, "dummyOver"],
         dummyown:     [20, 20, "dummySown"],
+        } 
+    });
+    spriteSheets.arrowButtons = new createjs.SpriteSheet({
+        images: [queue.getResult("triangleButtons")],
+        frames: [[0,0,86,166,0,42,85.55],[86,0,86,166,0,41,85.55],[0,166,86,166,0,41,85.55],[86,166,86,166,0,42,85.55],[0,332,86,166,0,41,85.55],[86,332,86,166,0,41,85.55]],
+        animations: {
+        leftUp:    [0, 0, "leftUp"  ],
+        leftOver:  [1, 1, "leftOver"],
+        leftDown:  [2, 2, "leftDown"],
+        rightUp:   [3, 3, "rightUp"  ],
+        rightOver: [4, 4, "rightOver"],
+        rightDown: [5, 5, "rightDown"],
         } 
     });
     
@@ -1627,7 +1645,7 @@ function initLocker(container) {
         for(i = 0; i<9;i++) {
             toAdd = new Sticker();
             toAdd.graphic = new loadImage("badStick"+i);
-            toAdd.cost = i*2;
+            toAdd.cost = i*2 + 1;
             toAdd.isUnlocked = cheatCount(i/2);
 
             allStickers.push(toAdd);
@@ -1636,14 +1654,12 @@ function initLocker(container) {
         for(i = 0; i<16;i++) {
             toAdd = new Sticker();
             toAdd.graphic = new loadImage("goodStick"+i);
-            toAdd.cost = i*2;
+            toAdd.cost = i*2 + 1;
             toAdd.isUnlocked = testCount(i/2);
 
             allStickers.push(toAdd);
         }
     }());
-    var validStickers = new HashSet();
-    var newStickers = new HashSet();
     
     var homeButton = CreateButtonFromSprite(spriteSheets.makeButton(),"menu",function(){ CurrentGameState = GameStates.StartScreen; });
     container.addChild(homeButton);
@@ -1668,7 +1684,7 @@ function initLocker(container) {
     });
     
     function StickerClicked(cloneOfSticker) {
-        //if(globalStats.points >= cloneOfSticker.cost)
+        if(globalStats.points >= cloneOfSticker.cost)
         {
             cloneOfSticker.graphic.scaleX = cloneOfSticker.graphic.scaleY = 0.25;
             container.addChild(cloneOfSticker.graphic); // required?
@@ -1690,16 +1706,17 @@ function initLocker(container) {
                 // add check for trash?
             });
             myLocker.myStickers.add(cloneOfSticker);
+            store.update();
         }
     }
     
     allStickers.map(function(item) {
         item.graphic.x = item.graphic.y = 100;
-        item.graphic.scaleX = item.graphic.scaleY = 0.5;
+        item.graphic.scaleX = item.graphic.scaleY = 0.7;
         item.graphic.regX = item.graphic.getBounds().width / 2;
         item.graphic.regY = item.graphic.getBounds().height / 2;
         item.graphic.on("click",function() { StickerClicked(item.clone()); });
-        //item.graphic.visible = false;
+        item.graphic.visible = false;
         container.addChild(item.graphic);
     });
     
@@ -1744,12 +1761,16 @@ function initLocker(container) {
             
             
         
-        //setup stickers
-        var oldStickers = new HashSet(validStickers.toList());
-        validStickers.addAll(Where(allStickers,function(item) { item.isUnlocked(globalStats); }));
-        newStickers = validStickers.removeSet(oldStickers);
-        
-        
+        store.update();
+    
+        store.shapes.btnL.x = 11 + store.shapes.btnL.getBounds().width / 2;
+        store.shapes.btnL.y = 420 + store.shapes.btnL.getBounds().height / 2;
+
+        store.shapes.btnR.x = stage.canvas.width - 11 - store.shapes.btnR.getBounds().width * 1.5;
+        store.shapes.btnR.y = 420 + store.shapes.btnR.getBounds().height / 2;
+
+        container.addChild(store.shapes.btnL);
+        container.addChild(store.shapes.btnR);
     };
     
     
@@ -1758,28 +1779,47 @@ function initLocker(container) {
         elementsPerPage: 3,
         padding: new Vec2(30,0),
         shapes: {
-            btnL: null,
-            btnR: null,
+            btnL: CreateButtonFromSprite(spriteSheets.makeArrows(),"left",   function() { store.currentPage--; store.update();}),
+            btnR: CreateButtonFromSprite(spriteSheets.makeArrows(),"right",  function() { store.currentPage++; store.update();}),
             pool: (function(){
                 var ret = [];
                 for(var i=0;i<3;i++) {
                     ret.push({img: null, txt: new createjs.Text("","bold 16px Arial", "#FFF")});
+                    container.addChild(ret[ret.length-1].txt);
                 }
+                return ret;
             }())
         },
         update: function() {
             this.shapes.btnL.visible = this.currentPage > 0;
-            this.shapes.btnR.visible = (this.currentPage+1)*this.elementsPerPage < validStickers.size();
-            var masterList = [];
-            validStickers.map(function(item) {
+            this.shapes.btnR.visible = (this.currentPage+1)*this.elementsPerPage < allStickers.length;
+            allStickers.map(function(item) {
                 item.graphic.visible = false;
-                masterList.push(item);
             });
             for(var i=0;i<this.elementsPerPage;i++) {
                 var index = this.currentPage * this.elementsPerPage + i;
-                if(index < masterList.length) {
-                    
+                //hide the old
+                if(this.shapes.pool[i].img !== null) this.shapes.pool[i].img.visible = false;
+                
+                if(index < allStickers.length) {
+                    this.shapes.pool[i].img = allStickers[index].graphic;
+                    if(allStickers[index].isUnlocked(globalStats)) {
+                        if(globalStats.points >= allStickers[index].cost) {
+                            this.shapes.pool[i].txt.text = "Buy: "+allStickers[index].cost;
+                        } else {
+                            this.shapes.pool[i].txt.text = "To Expensive: "+allStickers[index].cost;
+                        }
+                    } else {
+                        this.shapes.pool[i].txt.text = "Locked!";
+                    }
+                    this.shapes.pool[i].img.visible = true;
+                    this.shapes.pool[i].txt.visible = true;
+                    var start = new Vec2(200,500);
+                    var padding = new Vec2((stage.canvas.width-start.x * 2) / this.elementsPerPage,0).mul(i);
+                    copyXY(this.shapes.pool[i].img,start.add(padding));
+                    copyXY(this.shapes.pool[i].txt,start.add(padding).add(new Vec2(0,50)));
                 } else {
+                    if(this.shapes.pool[i].img !== null) this.shapes.pool[i].img.visible = false;
                     this.shapes.pool[i].txt.visible = false;
                 }
             }
