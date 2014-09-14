@@ -1083,10 +1083,12 @@ var Stats = (function(){
     Stats.prototype.add = function(that) {
         var ret = new Stats();
         for(var i in this) {
+            if(typeof ret[i] !== 'function')
             ret[i] = this[i] + that[i];
         }
         // roll score as average
         ret.score = (this.score * this.numOfTests + that.score * that.numOfTests)  / ret.numOfTests; // ret numof tests should already be set
+        return ret;
     };
     Stats.prototype.numOfQuestions = function() {
         return this.correctAnswers + this.incorrectAnswers;
@@ -1548,6 +1550,7 @@ function initGameScene(container) {
             }
         }
         lastTest = test;
+        globalStats = globalStats.add(test.stats);
         var blackOutTimer = new CountDownTimer(2);
         blackOutTimer.timeCompleteEvent.addCallBack(function() {
             setTimeout(function() {
