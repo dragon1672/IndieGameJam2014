@@ -1290,25 +1290,8 @@ var moodyMusic = [
     "Pos1",
     "GamePlay",
     "Neg1",
-    "Neg2", // really bad
+    "Neg2" // really bad
 ];
-
-var questions = {
-    questions: [],
-    currentQuestionIndex: 0,
-    startingPos: new Vec2(250,350),
-    spacing: new Vec2(0,70),
-    currentQuestionText: new createjs.Text("Questions", "bold italic 35px Arial", "#000"),
-    currentAnswerText: new createjs.Text(" ", "bold italic 35px Rage", "#000"),
-    updateCurrentGraphic: function() {
-        var q = this.questions[this.currentQuestionIndex];
-        this.currentQuestionText.text = q.text;
-        copyXY(this.currentQuestionText,this.startingPos);
-        
-        this.currentAnswerText.text = q.userAnswer === null ? "122" : q.userAnswer;
-        copyXY(this.currentAnswerText,this.startingPos.add(new Coord(150,0)));
-    },
-};
 
 function initGameScene(container) {
     
@@ -1347,12 +1330,7 @@ function initGameScene(container) {
     
     container.addChild(cheat1);
     container.addChild(cheat2);
-    container.addChild(questions.currentQuestionText);
-    container.addChild(questions.currentAnswerText);
     
-    var title = new createjs.Text("Super Hard Test", "bold italic 25px Arial", "#000");
-    copyXY(title,new Vec2(250,230));
-    container.addChild(title);
     var timeLeft = new createjs.Text("[time left]","25px EraserRegular","#fff");
     copyXY(timeLeft,new Vec2(70,60));
     container.addChild(timeLeft);
@@ -1369,27 +1347,77 @@ function initGameScene(container) {
     teacher.scaleX = 0.75;
     teacher.scaleY = 0.75;
     container.addChild(teacher);
-    
+
     
     function Choice(x,y) {
-        this.text = new createjs.Text("option","bold italic 35px Rage", "#999");
+        this.value = -1;
         this.box = new createjs.Shape();
+        this.text = new createjs.Text("option","bold italic 35px Rage", "#999");
         this.pos = new Vec2(x,y);
-        
+
         this.update = function() {
             copyXY(this.text,this.pos);
             copyXY(this.box, this.pos);
+            this.text.text = this.value;
         };
+        var instance = this;
         
-        this.box.graphics.beginFill("#F00").drawRect(0,0, 60, 40);
+        this.box.on("click",  function(){ makeChoice(instance.value); });
+
+        this.box.graphics.beginStroke("#0A5").drawRect(-20, 0, 70, 40);
+        var hitArea = new createjs.Shape(new createjs.Graphics().beginFill("#000000").drawRect(-20, 0, 70, 40));
+        this.box.hitArea = hitArea;
+        //border.graphics.setStrokeStyle(1);
         container.addChild(this.box);
+        container.addChild(this.text);
     }
+
+    var questions = {
+        questions: [],
+        currentQuestionIndex: 0,
+        startingPos: new Vec2(250,350),
+        spacing: new Vec2(0,70),
+        currentQuestionText: new createjs.Text("Questions", "bold italic 35px Arial", "#000"),
+        currentAnswerText: new createjs.Text(" ", "bold italic 35px Rage", "#000"),
+        title: new createjs.Text("Super Hard Question 1 / 1", "bold italic 25px Arial", "#000"),
+        options: [
+            new Choice(300,400),
+            new Choice(400,400),
+            new Choice(500,400),
+            new Choice(300,500),
+            new Choice(400,500),
+            new Choice(500,500)
+        ],
+        updateCurrentGraphic: function() {
+            this.title.text = "Super Hard Question "+(this.currentQuestionIndex+1)+" / "+this.questions.length;
+            var q = this.questions[this.currentQuestionIndex];
+            this.currentQuestionText.text = q.text;
+            copyXY(this.currentQuestionText,this.startingPos);
+
+            this.currentAnswerText.text = q.userAnswer === null ? "???" : q.userAnswer;
+            copyXY(this.currentAnswerText,this.startingPos.add(new Coord(150,0)));
+            
+            for(var i=0;i<questions.options.length;i++) {
+                questions.options[i].value = test.questions[questions.currentQuestionIndex].savedMultiChoice[i];
+                questions.options[i].update();
+            }
+        },
+    };
+    container.addChild(questions.currentQuestionText);
+    container.addChild(questions.currentAnswerText);
+    copyXY(questions.title,new Vec2(250,230));
+    container.addChild(questions.title);
     
-    var options = [];
-    
-    
-    
-    
+    function makeChoice(value) {
+        questions.questions[questions.currentQuestionIndex++].userAnswer = value;
+        
+        if(questions.currentQuestionIndex < questions.questions.length) {
+            questions.updateCurrentGraphic();
+        } else {
+            gameComplete();
+        }
+        
+    }
     
     GameStates.Game.enable = function() {
         var musicIndex = Math.floor(globalStats.numOfQuestions() > 0 ? clamp((globalStats.cheatCount / globalStats.numOfQuestions())*moodyMusic.length,0,moodyMusic.length-1) : moodyMusic.length / 2);
@@ -1401,12 +1429,12 @@ function initGameScene(container) {
         test.generate();
         cheats = [[],[]];
         for(var i=0;i<test.questions.length;i++) {
-            cheats[0][i] = getCheat(test.questions[i],0.75);
-            cheats[1][i] = getCheat(test.questions[i],0.75);
+            test.questions[i].genMultiChoice(questions.options.length);
+            cheats[0][i] = getCheat(test.questions[i],0.6);
+            cheats[1][i] = getCheat(test.questions[i],0.6);
          }
         //display test
         //reset collection
-        questions.currentIndexGraphic = 0;
         questions.questions = test.questions;
         questions.updateCurrentGraphic();
         
@@ -1454,15 +1482,25 @@ function initGameScene(container) {
     
     function gameComplete(cheated) {
         timer.stop();
-        if(!cheated) {
-            createjs.Sound.play("PencilsDown");
-        }
         test.updateStats();
         test.stats.cheatCount += questionsCheatedOn.size();
-        //test.stats.points = ??? //update do something
+        if(!cheated) {
+            createjs.Sound.play("PencilsDown");
+            var bonusPoints = Math.floor(timer.getTimeLeft() / 30);
+            var grade = test.stats.grade();
+            if(grade.letter.charAt(0) === "A") {
+                test.stats.points += 7 + bonusPoints;
+            } else if(grade.letter.charAt(0) === "B") {
+                test.stats.points += 5 + bonusPoints * 0.9;
+            } else if(grade.letter.charAt(0) === "C") {
+                test.stats.points += 2;
+            } else if(grade.letter.charAt(0) === "D") {
+                test.stats.points += 1;
+            }
+        }
+        lastTest = test;
         
-        //fade screen
-        //gen stats
+        CurrentGameState = GameStates.GameOver;
     }
     
     timer.timeCompleteEvent.addCallBack(gameComplete);
