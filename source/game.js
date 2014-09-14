@@ -542,7 +542,7 @@ var FPS = 30;
     }
     function Max(array, numToCompare) { numToCompare = numToCompare || function(a) { return a; }; return SingleSelect(array,function(a,b) { return numToCompare(a) > numToCompare(b) ? a : b; }); }
     function Min(array, numToCompare) { numToCompare = numToCompare || function(a) { return a; }; return SingleSelect(array,function(a,b) { return numToCompare(a) < numToCompare(b) ? a : b; }); }
-    function Sum(array, numToCompare) { return SingleSelect(array,function(a,b) { return a + b; }); }
+    function Sum(array) { return SingleSelect(array,function(a,b) { return a + b; }); }
     function Select(array,selector) {
         selector = selector || function(item) { return item; };
         var ret = [];
@@ -988,7 +988,7 @@ function init() {
             nextBtn.text.visible = (currentQuestion < lastTest.questions.length-1);
             
             
-            title.text = "You got "+lastTest.stats.correctAnswers+"/"+lastTest.stats.numOfQuestions()+" = "+Math.floor(lastTest.stats.getScore())+"% ("+lastTest.stats.grade().letter+")";
+            title.text = "You got "+lastTest.stats.correctAnswers+"/"+lastTest.stats.numOfQuestions()+" = "+(lastTest.stats.getScore()/10)+"% ("+lastTest.stats.grade().letter+")";
             var q = lastTest.questions;
             var i = currentQuestion;
             question.text = ""+(i+1)+") "+q[i].a+" "+q[i].operation.char+" "+q[i].b+" = \nYour Answer: "+q[i].userAnswer+"\nCorrect Answer: "+q[i].correctAnswer+"";
@@ -1120,7 +1120,7 @@ var DefaultMathOperations = (function(){
     var defaultMathOperations = {
         add: new BinaryMathOperation(function(a,b) { return a + b; },"+"),
         sub: new BinaryMathOperation(function(a,b) { return a - b; },"-"),
-        mul: new BinaryMathOperation(function(a,b) { return a * b; },"*"),
+        mul: new BinaryMathOperation(function(a,b) { return a * b; },"x"),
         div: new BinaryMathOperation(function(a,b) { return a / b; },"/"),
     };
     defaultMathOperations.div.generatePair = function(rangeLow,rangeHigh) {
@@ -1237,7 +1237,7 @@ var MathTest = (function(){
             this.stats.timesCaught = 1;
         } else {
             this.stats.timesCaught = 0;
-            this.stats.score = this.stats.correctAnswers / (this.stats.incorrectAnswers + this.stats.correctAnswers);
+            this.stats.score = this.stats.correctAnswers / this.stats.numOfQuestions();
         }
     };
     
@@ -1536,12 +1536,11 @@ function initGameScene(container) {
         test.stats.cheatCount += questionsCheatedOn.size();
         if(!cheated) {
             createjs.Sound.play("PencilsDown");
-            var bonusPoints = Math.floor(timer.getTimeLeft() / 30);
             var grade = test.stats.grade();
             if(grade.letter.charAt(0) === "A") {
-                test.stats.points += 7 + bonusPoints;
+                test.stats.points += 7;
             } else if(grade.letter.charAt(0) === "B") {
-                test.stats.points += 5 + bonusPoints * 0.9;
+                test.stats.points += 5;
             } else if(grade.letter.charAt(0) === "C") {
                 test.stats.points += 2;
             } else if(grade.letter.charAt(0) === "D") {
