@@ -1016,7 +1016,7 @@ function init() {
         var home = new MeButton(400,500, "Home");
         var prevBtn = new MeButton(100,500, "prev");
         nextBtn.box.on("click",  function(){ currentQuestion++; updateGraphics(); });
-        home.box.on("click",  function(){ CurrentGameState = GameStates.StartScreen; });
+        home.box.on("click",  function(){ CurrentGameState = GameStates.Locker; });
         prevBtn.box.on("click",  function(){ currentQuestion--; updateGraphics(); });
         
         var title = new createjs.Text("You got x/x = 50% (A+)","25px EraserRegular","#fff");
@@ -1043,13 +1043,6 @@ function init() {
             var i = currentQuestion;
             question.text = ""+(i+1)+") "+q[i].a+" "+q[i].operation.char+" "+q[i].b+" = \nYour Answer: "+q[i].userAnswer+"\nCorrect Answer: "+q[i].correctAnswer+"";
         }
-        
-        GameStates.GameOver.update = function() {
-            
-        };
-        GameStates.GameOver.disable = function() {
-            
-        };
     }());
     
     CurrentGameState = GameStates.StartScreen;
@@ -1618,7 +1611,7 @@ function initGameScene(container) {
             var percent = 1 - blackOutTimer.time / blackOutTimer.startTime;
             screenCover.alpha = percent;
         });
-        blackOutTimer.start();
+        setTimeout(blackOutTimer.start(),500);
     }
     
     timer.timeCompleteEvent.addCallBack(gameComplete);
