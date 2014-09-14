@@ -1010,30 +1010,23 @@ function init() {
         //lastTest
         //display test and score
         //offer button to goto home
-        function MeButton(x,y, text) {
-            this.box = new createjs.Shape();
-            this.text = new createjs.Text(text,"bold italic 25px Rage", "#999");
-            var pos = new Vec2(x,y);
-
-            copyXY(this.text,pos);
-            copyXY(this.box, pos);
-
-            this.box.graphics.beginStroke("#FFF").drawRect(-20, 0, 70, 40);
-            var hitArea = new createjs.Shape(new createjs.Graphics().beginFill("#000000").drawRect(-20, 0, 70, 40));
-            this.box.hitArea = hitArea;
-            GameStates.GameOver.container.addChild(this.box);
-            GameStates.GameOver.container.addChild(this.text);
-        }
         var currentQuestion = 0;
         
-        var nextBtn = new MeButton(600,500, "next");
-        var home = new MeButton(400,500, "Home");
-        var prevBtn = new MeButton(100,500, "prev");
-        nextBtn.box.on("click",  function(){ currentQuestion++; updateGraphics(); });
-        home.box.on("click",  function(){ CurrentGameState = GameStates.Locker; });
-        prevBtn.box.on("click",  function(){ currentQuestion--; updateGraphics(); });
+        var nextBtn = CreateButtonFromSprite(spriteSheets.makeArrows(),"right"); //600 500
+        nextBtn.x = 600; GameStates.GameOver.container.addChild(nextBtn);
+        var home = CreateButtonFromSprite(spriteSheets.makeButton(),"locker"); // 400 600
+        home.x = 400; GameStates.GameOver.container.addChild(home);
+        var prevBtn = CreateButtonFromSprite(spriteSheets.makeArrows(),"left"); // 100 500
+        prevBtn.x = 200; GameStates.GameOver.container.addChild(prevBtn);
+        nextBtn.y = home.y = prevBtn.y = 500;
+        nextBtn.scaleX = home.scaleX = prevBtn.scaleX = nextBtn.scaleY = home.scaleY = prevBtn.scaleY = 0.75;
         
-        var title = new createjs.Text("You got x/x = 50% (A+)","25px EraserRegular","#fff");
+        
+        nextBtn.on("click",  function(){ currentQuestion++; updateGraphics(); });
+        home.on("click",  function(){ CurrentGameState = GameStates.Locker; });
+        prevBtn.on("click",  function(){ currentQuestion--; updateGraphics(); });
+        
+        var title = new createjs.Text("You got x/x = (A+)","25px EraserRegular","#fff");
         var question = new createjs.Text("#1) a + b = \nYour Answer: [number]\nCorrect Answer: [number]","25px EraserRegular","#fff");
         title.x = question.x = 100;
         title.y = 200;
@@ -1046,13 +1039,11 @@ function init() {
             updateGraphics();
         };
         function updateGraphics() {
-            prevBtn.box.visible  = (currentQuestion > 0);
-            prevBtn.text.visible = (currentQuestion > 0);
-            nextBtn.box.visible  = (currentQuestion < lastTest.questions.length-1);
-            nextBtn.text.visible = (currentQuestion < lastTest.questions.length-1);
+            prevBtn.visible  = (currentQuestion > 0);
+            nextBtn.visible  = (currentQuestion < lastTest.questions.length-1);
             
             
-            title.text = "You got "+lastTest.stats.correctAnswers+"/"+lastTest.stats.numOfQuestions()+" = "+(lastTest.stats.getScore()/10)+"% ("+lastTest.stats.grade().letter+")";
+            title.text = "You got "+lastTest.stats.correctAnswers+"/"+lastTest.stats.numOfQuestions()+" ("+lastTest.stats.grade().letter+")";
             var q = lastTest.questions;
             var i = currentQuestion;
             question.text = ""+(i+1)+") "+q[i].a+" "+q[i].operation.char+" "+q[i].b+" = \nYour Answer: "+q[i].userAnswer+"\nCorrect Answer: "+q[i].correctAnswer+"";
@@ -1233,6 +1224,7 @@ var Question = (function(){
     Question.prototype.genMultiChoice = function(num) {
         this.savedMultiChoice = new HashSet();
         var pool = new HashSet(this._incorrectPool);
+        pool.remove(1/0);
         pool.remove(this.correctAnswer);
         var randomindex = Rand(0,num-1);
         while(this.savedMultiChoice.size() < num) {
@@ -1527,12 +1519,14 @@ function initGameScene(container) {
     container.addChild(questions.title);
     
     function makeChoice(value) {
-        questions.questions[questions.currentQuestionIndex++].userAnswer = value;
-        
-        if(questions.currentQuestionIndex < questions.questions.length) {
-            questions.updateCurrentGraphic();
-        } else {
-            gameComplete();
+        if(onceShot) {
+            questions.questions[questions.currentQuestionIndex++].userAnswer = value;
+
+            if(questions.currentQuestionIndex < questions.questions.length) {
+                questions.updateCurrentGraphic();
+            } else {
+                gameComplete();
+            }
         }
         
     }
@@ -1634,9 +1628,10 @@ function initGameScene(container) {
             });
             blackOutTimer.timer.updateEvent.addCallBack(function() {
                 var percent = 1 - blackOutTimer.time / blackOutTimer.startTime;
-                screenCover.alpha = percent;
+                screenCover.alpha = clamp(percent,0.1,1);
             });
-            setTimeout(blackOutTimer.start(),500);
+            screenCover.alpha = 0.1;
+            setTimeout(function() {blackOutTimer.start();},500);
         }
     }
     
