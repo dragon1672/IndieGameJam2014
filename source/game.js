@@ -1594,38 +1594,41 @@ function initGameScene(container) {
         timer.stop();
         stopCheating();
     };
-    
+    var onceShot = true;
     function gameComplete(cheated) {
-        timer.stop();
-        test.updateStats();
-        test.stats.cheatCount += questionsCheatedOn.size();
-        if(!cheated) {
-            createjs.Sound.play("PencilsDown");
-            var grade = test.stats.grade();
-            if(grade.letter.charAt(0) === "A") {
-                test.stats.points += 7;
-            } else if(grade.letter.charAt(0) === "B") {
-                test.stats.points += 5;
-            } else if(grade.letter.charAt(0) === "C") {
-                test.stats.points += 2;
-            } else if(grade.letter.charAt(0) === "D") {
-                test.stats.points += 1;
+        if(onceShot) {
+            onceShot = false;
+            timer.stop();
+            test.updateStats();
+            test.stats.cheatCount += questionsCheatedOn.size();
+            if(!cheated) {
+                createjs.Sound.play("PencilsDown");
+                var grade = test.stats.grade();
+                if(grade.letter.charAt(0) === "A") {
+                    test.stats.points += 7;
+                } else if(grade.letter.charAt(0) === "B") {
+                    test.stats.points += 5;
+                } else if(grade.letter.charAt(0) === "C") {
+                    test.stats.points += 2;
+                } else if(grade.letter.charAt(0) === "D") {
+                    test.stats.points += 1;
+                }
             }
+            lastTest = test;
+            globalStats = globalStats.add(test.stats);
+            var blackOutTimer = new CountDownTimer(2);
+            blackOutTimer.timeCompleteEvent.addCallBack(function() {
+                setTimeout(function() {
+                    CurrentGameState = GameStates.GameOver;
+                    screenCover.alpha = 0;
+                },2000);
+            });
+            blackOutTimer.timer.updateEvent.addCallBack(function() {
+                var percent = 1 - blackOutTimer.time / blackOutTimer.startTime;
+                screenCover.alpha = percent;
+            });
+            setTimeout(blackOutTimer.start(),500);
         }
-        lastTest = test;
-        globalStats = globalStats.add(test.stats);
-        var blackOutTimer = new CountDownTimer(2);
-        blackOutTimer.timeCompleteEvent.addCallBack(function() {
-            setTimeout(function() {
-                CurrentGameState = GameStates.GameOver;
-                screenCover.alpha = 0;
-            },2000);
-        });
-        blackOutTimer.timer.updateEvent.addCallBack(function() {
-            var percent = 1 - blackOutTimer.time / blackOutTimer.startTime;
-            screenCover.alpha = percent;
-        });
-        setTimeout(blackOutTimer.start(),500);
     }
     
     timer.timeCompleteEvent.addCallBack(gameComplete);
@@ -1734,7 +1737,9 @@ function initLocker(container) {
     });
     
     GameStates.Locker.enable = function() {
-        backgroundMusic.setSoundFromString("GamePlay",true);
+        var musicIndex = Math.floor(globalStats.numOfQuestions() > 0 ? clamp((globalStats.cheatCount / globalStats.numOfQuestions())*moodyMusic.length,0,moodyMusic.length-1) : moodyMusic.length / 2);
+        
+        backgroundMusic.setSoundFromString(moodyMusic[musicIndex],true);
         
         //setup stats
         displayOfStats[0].txt.text = "Cheated \n"  +  globalStats.cheatCount  + " times";
