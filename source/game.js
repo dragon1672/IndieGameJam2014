@@ -415,7 +415,9 @@ var FPS = 30;
         Bounds.prototype.clampWithinBounds = function(pos) {
             var zeroBased = pos.sub(this.start);
             var offset = this.end.sub(this.start);
-            return this.start.add(clampVec(zeroBased,offset.x,offset.y));
+            zeroBased.x = clamp(zeroBased.x,0,offset.x);
+            zeroBased.y = clamp(zeroBased.y,0,offset.y);
+            return this.start.add(zeroBased);
         };
         Bounds.prototype.randomPointInside = function() {
             return new Vec2(
@@ -1348,7 +1350,7 @@ var allStickers = []; // set this somehow
 
 var myLocker = {
     myStickers: new HashSet(),
-    bounds: new Bounds(new Coord(400,0),new Coord(700,400)), // update
+    bounds: new Bounds(new Coord(420,0),new Coord(650,370)), // update
 };
 
 var globalStats = new Stats();
@@ -1676,8 +1678,8 @@ function initLocker(container) {
             copyXY(cloneOfSticker.graphic,cloneOfSticker.pos);
             //register update
             cloneOfSticker.graphic.on("pressmove",function(evt) {
-                //var newPos = myLocker.bounds.clampWithinBounds(new Vec2(evt.stageX,evt.stageY));
-                var newPos = new Vec2(evt.stageX,evt.stageY);
+                var newPos = myLocker.bounds.clampWithinBounds(new Vec2(evt.stageX,evt.stageY));
+                //var newPos = new Vec2(evt.stageX,evt.stageY);
                 
                 evt.target.x = newPos.x;
                 evt.target.y = newPos.y;
