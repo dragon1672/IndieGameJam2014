@@ -1450,7 +1450,7 @@ function initGameScene(container) {
 
         teacher.gotoAndPlay("Play");
         teacher.x = 600;
-        teacher.y = 140;
+        teacher.y = 160;
         teacher.scaleX = 0.75;
         teacher.scaleY = 0.75;
         container.addChild(teacher);

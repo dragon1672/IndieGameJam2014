@@ -1,14 +1,12 @@
-Need to fix
+NEEDS
 make sure no /0 errors == Infinity
 Make normal "end test" audio play sooner
- center math question between title and options
- 
- Corrections Screen:
- text for home, next, and previous not centered in their boxes
 
-Wants
+WANTS
 
 Game Scene:
+Center math question between title and options
+
 Give extra credit for finishing with extra time +1 point per +30 seconds 
 Inform users of the extra creidt earned. on Corrections screen
 
