@@ -1,7 +1,3 @@
-NEEDS
-make sure no /0 errors == Infinity
-Make normal "end test" audio play sooner
-
 WANTS
 
 Game Scene:
@@ -14,7 +10,5 @@ Display time as
 Time     
 Left    
 	With the time left BIG next to it so it's easier to see.
-
- lower the position of the teacher so you can see more of him/ his hair
  
  Have ability to get GPA back up to at least a C if once was at an F?
