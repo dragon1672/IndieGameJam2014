@@ -1398,7 +1398,7 @@ function initGameScene(container) {
     screenCover.graphics.beginFill("#000").drawRect(0, 0, stage.canvas.width, stage.canvas.height);
     screenCover.alpha = 0;
     
-    var timer = new CountDownTimer(2*60);
+    var timer = new CountDownTimer(60 * 1.5);
     var test;
     
     var funnyResponces =  [
@@ -1614,6 +1614,12 @@ function initGameScene(container) {
                 for(var i =0;i<test.questions.length;i++) {
                     questionsCheatedOn.add(i);
                 }
+                //remove top sticker
+                myLocker.myStickers.remove(
+                    Max(myLocker.myStickers.toList(),function(i) {
+                        return i.cost;
+                    })
+                );
             }
             
             test.stats.cheatCount += questionsCheatedOn.size();
