@@ -587,7 +587,7 @@ var manifest = [
     {src:"audio/moralMathNegative1.wav", id:"Neg1"},
     {src:"audio/moralMathNegative2.wav", id:"Neg2"},
     {src:"audio/PencilsDownYoung.wav", id:"PencilsDown"},
-    {src:"audio/cheater.wav", id:"cheater"},
+    {src:"audio/Cheater.wav", id:"cheater"},
     {src:"images/buttons.png", id:"button"},
     {src:"images/wideStickyNote.png", id:"wideStickyNote"},
     {src:"images/miniButtons.png", id:"miniButton"},
@@ -601,32 +601,32 @@ var manifest = [
     {src:"audio/ForJamie.mp3", id:"Friday"},
     {src:"audio/moralMathTheme.wav", id:"StartScreen"},
     //all dem stickers
-    {src:"images/stickers/bad/badSticker0.png", id:"badStick0"},
-    {src:"images/stickers/bad/badSticker1.png", id:"badStick1"},
-    {src:"images/stickers/bad/badSticker2.png", id:"badStick2"},
-    {src:"images/stickers/bad/badSticker3.png", id:"badStick3"},
-    {src:"images/stickers/bad/badSticker4.png", id:"badStick4"},
-    {src:"images/stickers/bad/badSticker5.png", id:"badStick5"},
-    {src:"images/stickers/bad/badSticker6.png", id:"badStick6"},
-    {src:"images/stickers/bad/badSticker7.png", id:"badStick7"},
-    {src:"images/stickers/bad/badSticker8.png", id:"badStick8"},
+    {src:"images/Stickers/Bad/BadSticker0.png", id:"badStick0"},
+    {src:"images/Stickers/Bad/BadSticker1.png", id:"badStick1"},
+    {src:"images/Stickers/Bad/BadSticker2.png", id:"badStick2"},
+    {src:"images/Stickers/Bad/BadSticker3.png", id:"badStick3"},
+    {src:"images/Stickers/Bad/BadSticker4.png", id:"badStick4"},
+    {src:"images/Stickers/Bad/BadSticker5.png", id:"badStick5"},
+    {src:"images/Stickers/Bad/BadSticker6.png", id:"badStick6"},
+    {src:"images/Stickers/Bad/BadSticker7.png", id:"badStick7"},
+    {src:"images/Stickers/Bad/BadSticker8.png", id:"badStick8"},
     //good
-    {src:"images/stickers/good/goodSticker0.png",  id:"goodStick0" },
-    {src:"images/stickers/good/goodSticker1.png",  id:"goodStick1" },
-    {src:"images/stickers/good/goodSticker2.png",  id:"goodStick2" },
-    {src:"images/stickers/good/goodSticker3.png",  id:"goodStick3" },
-    {src:"images/stickers/good/goodSticker4.png",  id:"goodStick4" },
-    {src:"images/stickers/good/goodSticker5.png",  id:"goodStick5" },
-    {src:"images/stickers/good/goodSticker6.png",  id:"goodStick6" },
-    {src:"images/stickers/good/goodSticker7.png",  id:"goodStick7" },
-    {src:"images/stickers/good/goodSticker8.png",  id:"goodStick8" },
-    {src:"images/stickers/good/goodSticker9.png",  id:"goodStick9" },
-    {src:"images/stickers/good/goodSticker10.png", id:"goodStick10"},
-    {src:"images/stickers/good/goodSticker11.png", id:"goodStick11"},
-    {src:"images/stickers/good/goodSticker12.png", id:"goodStick12"},
-    {src:"images/stickers/good/goodSticker13.png", id:"goodStick13"},
-    {src:"images/stickers/good/goodSticker14.png", id:"goodStick14"},
-    {src:"images/stickers/good/goodSticker15.png", id:"goodStick15"},
+    {src:"images/Stickers/Good/GoodSticker0.png",  id:"goodStick0" },
+    {src:"images/Stickers/Good/GoodSticker1.png",  id:"goodStick1" },
+    {src:"images/Stickers/Good/GoodSticker2.png",  id:"goodStick2" },
+    {src:"images/Stickers/Good/GoodSticker3.png",  id:"goodStick3" },
+    {src:"images/Stickers/Good/GoodSticker4.png",  id:"goodStick4" },
+    {src:"images/Stickers/Good/GoodSticker5.png",  id:"goodStick5" },
+    {src:"images/Stickers/Good/GoodSticker6.png",  id:"goodStick6" },
+    {src:"images/Stickers/Good/GoodSticker7.png",  id:"goodStick7" },
+    {src:"images/Stickers/Good/GoodSticker8.png",  id:"goodStick8" },
+    {src:"images/Stickers/Good/GoodSticker9.png",  id:"goodStick9" },
+    {src:"images/Stickers/Good/GoodSticker10.png", id:"goodStick10"},
+    {src:"images/Stickers/Good/GoodSticker11.png", id:"goodStick11"},
+    {src:"images/Stickers/Good/GoodSticker12.png", id:"goodStick12"},
+    {src:"images/Stickers/Good/GoodSticker13.png", id:"goodStick13"},
+    {src:"images/Stickers/Good/GoodSticker14.png", id:"goodStick14"},
+    {src:"images/Stickers/Good/GoodSticker15.png", id:"goodStick15"},
 ];
 
 var queue;
@@ -750,7 +750,7 @@ function loadFiles() {
     function LoadComplete(event) {
         event = event;
         //once the files are loaded, put them into usable objects
-        txt.text = "Click to continue";
+        txt.text = "Click here to continue";
         backgroundMusic.allLoaded = true;
         backgroundMusic.enable();
         progress.on("click",function() {
