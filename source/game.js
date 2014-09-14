@@ -942,14 +942,57 @@ function init() {
     initGameScene(GameStates.Game.container);
     initLocker(GameStates.Locker.container);
     //init gameOver
-    {
+    (function GameOverInitFunction() {
         //lastTest
         //display test and score
         //offer button to goto home
-        GameStates.GameOver.enable = function() {
-            
-        };
+        function MeButton(x,y, text) {
+            this.box = new createjs.Shape();
+            this.text = new createjs.Text(text,"bold italic 25px Rage", "#999");
+            var pos = new Vec2(x,y);
+
+            copyXY(this.text,pos);
+            copyXY(this.box, pos);
+
+            this.box.graphics.beginStroke("#FFF").drawRect(-20, 0, 70, 40);
+            var hitArea = new createjs.Shape(new createjs.Graphics().beginFill("#000000").drawRect(-20, 0, 70, 40));
+            this.box.hitArea = hitArea;
+            GameStates.GameOver.container.addChild(this.box);
+            GameStates.GameOver.container.addChild(this.text);
+        }
+        var currentQuestion = 0;
         
+        var nextBtn = new MeButton(600,500, "next");
+        var home = new MeButton(400,500, "Home");
+        var prevBtn = new MeButton(100,500, "prev");
+        nextBtn.box.on("click",  function(){ currentQuestion++; updateGraphics(); });
+        home.box.on("click",  function(){ CurrentGameState = GameStates.StartScreen; });
+        prevBtn.box.on("click",  function(){ currentQuestion--; updateGraphics(); });
+        
+        var title = new createjs.Text("You got x/x = 50% (A+)","25px EraserRegular","#fff");
+        var question = new createjs.Text("#1) a + b = \nYour Answer: [number]\nCorrect Answer: [number]","25px EraserRegular","#fff");
+        title.x = question.x = 100;
+        title.y = 200;
+        question.y = 300;
+        GameStates.GameOver.container.addChild(title);
+        GameStates.GameOver.container.addChild(question);
+        
+        GameStates.GameOver.enable = function() {
+            currentQuestion = 0;
+            updateGraphics();
+        };
+        function updateGraphics() {
+            prevBtn.box.visible  = (currentQuestion > 0);
+            prevBtn.text.visible = (currentQuestion > 0);
+            nextBtn.box.visible  = (currentQuestion < lastTest.questions.length-1);
+            nextBtn.text.visible = (currentQuestion < lastTest.questions.length-1);
+            
+            
+            title.text = "You got "+lastTest.stats.correctAnswers+"/"+lastTest.stats.numOfQuestions()+" = "+Math.floor(lastTest.stats.getScore())+"% ("+lastTest.stats.grade().letter+")";
+            var q = lastTest.questions;
+            var i = currentQuestion;
+            question.text = ""+(i+1)+") "+q[i].a+" "+q[i].operation.char+" "+q[i].b+" = \nYour Answer: "+q[i].userAnswer+"\nCorrect Answer: "+q[i].correctAnswer+"";
+        }
         
         GameStates.GameOver.update = function() {
             
@@ -957,9 +1000,11 @@ function init() {
         GameStates.GameOver.disable = function() {
             
         };
-    }
+    }());
+    
     CurrentGameState = GameStates.StartScreen;
 }
+
 //progress bar will run anything listed here should only be animation stuff without using any images
 function initLoadingScreen() {
     function randomDir() {
@@ -1239,10 +1284,10 @@ function getCheat(question, percentForCorrect) {
 //region global vars
 
 var StockTests = [
-    new MathTest([DefaultMathOperations.add],5,1,12),
-    new MathTest([DefaultMathOperations.add,DefaultMathOperations.sub],5,1,12),
-    new MathTest([DefaultMathOperations.add,DefaultMathOperations.sub,DefaultMathOperations.mul],5,1,12),
-    new MathTest([DefaultMathOperations.add,DefaultMathOperations.sub,DefaultMathOperations.mul,DefaultMathOperations.div],5,1,12)
+    new MathTest([DefaultMathOperations.add]                                                                               ,10,1,12),
+    new MathTest([DefaultMathOperations.add,DefaultMathOperations.sub]                                                     ,10,1,12),
+    new MathTest([DefaultMathOperations.add,DefaultMathOperations.sub,DefaultMathOperations.mul]                           ,10,1,12),
+    new MathTest([DefaultMathOperations.add,DefaultMathOperations.sub,DefaultMathOperations.mul,DefaultMathOperations.div] ,10,1,12)
 ];
 
 var GradeTable = {
@@ -1294,6 +1339,10 @@ var moodyMusic = [
 ];
 
 function initGameScene(container) {
+    
+    var screenCover = new createjs.Shape();
+    screenCover.graphics.beginFill("#000").drawRect(0, 0, stage.canvas.width, stage.canvas.height);
+    screenCover.alpha = 0;
     
     var timer = new CountDownTimer(2*60);
     var test;
@@ -1424,6 +1473,7 @@ function initGameScene(container) {
         
         backgroundMusic.setSoundFromString(moodyMusic[musicIndex],true);
         //generate test
+        questions.currentQuestionIndex = 0;
         questionsCheatedOn = new HashSet();
         test = StockTests[difficulty];
         test.generate();
@@ -1499,11 +1549,22 @@ function initGameScene(container) {
             }
         }
         lastTest = test;
-        
-        CurrentGameState = GameStates.GameOver;
+        var blackOutTimer = new CountDownTimer(2);
+        blackOutTimer.timeCompleteEvent.addCallBack(function() {
+            setTimeout(function() {
+                CurrentGameState = GameStates.GameOver;
+                screenCover.alpha = 0;
+            },2000);
+        });
+        blackOutTimer.timer.updateEvent.addCallBack(function() {
+            var percent = 1 - blackOutTimer.time / blackOutTimer.startTime;
+            screenCover.alpha = percent;
+        });
+        blackOutTimer.start();
     }
     
     timer.timeCompleteEvent.addCallBack(gameComplete);
+    container.addChild(screenCover);
 }
 
 function copyXY(to,from) {
