@@ -1,52 +1,22 @@
-notes
-
-BRITTANY
-Main Theme change song?
-Add a "You cheated" audio for the teacher
-a chaching for buying sticker
-a fail noise for unable buy sticker
-
-ANTHONY
-Locker:
-have "Points" on the far left and then have the # of points under image
-if points for an image are greater than your points display it in red, otherwise green?
-display Points the players have at the top of the pin board/ top right corner of store.
-make stickers a little bigger, want to be able to recognize them, but also not take up a ton
-of space
-
-Game Scene:
-Give extra credit for finishing with extra time +1 point per +30 seconds 
-Inform users of the extra creidt earned.
-
-make sure no /0 errors
-Display time as
-Time     
-Left    
-
-With the time left BIG next to it so it's easier to see.
-
- Change audio to player before screen blacks out
- center question between title and options
- lower the position of the teacher so you can see more of him/ his hair
- Cheating to full red = double black flash of screen?
- 
+Need to fix
+make sure no /0 errors == Infinity
+Make normal "end test" audio play sooner
+ center math question between title and options
  
  Corrections Screen:
  text for home, next, and previous not centered in their boxes
+
+Wants
+
+Game Scene:
+Give extra credit for finishing with extra time +1 point per +30 seconds 
+Inform users of the extra creidt earned. on Corrections screen
+
+Display time as
+Time     
+Left    
+	With the time left BIG next to it so it's easier to see.
+
+ lower the position of the teacher so you can see more of him/ his hair
  
- 
- Locker: (after test)
- 
- After cheating once to full red paper it says caught 24 times, should be 1
-	same wier errors with "Taken" and "Cheated"
-	Stats should be  number at the top then on second row times cheated, 
-	tests taken, points, times caught, and grade
-	
-	add ability to play sound when able and unable to buy a sticker
-	
  Have ability to get GPA back up to at least a C if once was at an F?
-	
-Change sound.
-Sound in background always stays to the neutrality of the player.
-normal sound is neutral
-update sound when you fade to corrections.
