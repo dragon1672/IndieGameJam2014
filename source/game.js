@@ -1666,18 +1666,24 @@ function initLocker(container) {
     });
     
     function StickerClicked(cloneOfSticker) {
-        if(globalStats.points >= cloneOfSticker.cost) {
-            container.addChild(cloneOfSticker); // required?
+        //if(globalStats.points >= cloneOfSticker.cost)
+        {
+            container.addChild(cloneOfSticker.graphic); // required?
             //buying sticker
             globalStats.points += cloneOfSticker.cost;
             //randomly place locker
             cloneOfSticker.pos = myLocker.bounds.randomPointInside();
+            copyXY(cloneOfSticker.graphic,cloneOfSticker.pos);
             //register update
-            cloneOfSticker.on("pressmove",function(evt) {
-                evt.target.x = evt.stageX;
-                evt.target.y = evt.stageY;
+            cloneOfSticker.graphic.on("pressmove",function(evt) {
+                //var newPos = myLocker.bounds.clampWithinBounds(new Vec2(evt.stageX,evt.stageY));
+                var newPos = new Vec2(evt.stageX,evt.stageY);
+                
+                evt.target.x = newPos.x;
+                evt.target.y = newPos.y;
+                
             });
-            cloneOfSticker.on("pressup", function() {
+            cloneOfSticker.graphic.on("pressup", function() {
                 // add check for trash?
             });
             myLocker.myStickers.add(cloneOfSticker);
