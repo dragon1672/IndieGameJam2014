@@ -367,8 +367,8 @@ var FPS = 30;
         Coord.prototype.projection = function(norm) { return (this.dot(norm).mul(norm)).div(norm.lengthSquared()); };
         Coord.prototype.rejection  = function(norm) { return this.sub(this.projection(norm)); };
         Coord.prototype.isZero     = function()     { return this.x === 0 && this.y === 0;};
-        Coord.prototype.withinBox  = function(exclusiveBounds) { return this.x >= 0 && this.y >= 0 && this.x < exclusiveBounds.x && this.y < exclusiveBounds.y; };
-        Coord.prototype.wrapByBox  = function(exclusiveBounds) { return new Coord(this.x % exclusiveBounds.x + (this.x < 0 ? exclusiveBounds.x-1 : 0) , this.y % exclusiveBounds.y + (this.y < 0 ? exclusiveBounds.y-1 : 0)); };
+        Coord.prototype.withinBox  = function(bounds) { return this.x >= 0 && this.y >= 0 && this.x < bounds.x && this.y < bounds.y; };
+        Coord.prototype.wrapByBox  = function(bounds) { return new Coord(this.x % bounds.x + (this.x < 0 ? bounds.x-1 : 0) , this.y % bounds.y + (this.y < 0 ? bounds.y-1 : 0)); };
         Coord.prototype.floor      = function()     { return new Coord(Math.floor(this.x),Math.floor(this.y)); };
         return Coord;
     }());
@@ -721,10 +721,10 @@ function loadFiles() {
         this.width = stage.canvas.width * widthPercent;
         this.height = height;
         this.x = stage.canvas.width / 2 - this.width / 2;
-        this.y = stage.canvas.height / 2 - this.height / 2;
+        this.y = stage.canvas.height - this.height;
     }
 
-    var dims = new ShapeData(50/100,100);
+    var dims = new ShapeData(99/100,18);
 
     progress.graphics.beginStroke("#280000").drawRect(dims.x,dims.y,dims.width,dims.height);
     progressBellow.graphics.beginStroke("#280000").drawRect(dims.x,dims.y,dims.width,dims.height);
