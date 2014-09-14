@@ -412,7 +412,7 @@ var FPS = 30;
             var offset = this.end.sub(this.start);
             return zeroBased.wrapByBox(offset).add(this.start);
         };
-        Bounds.prototype.wrapWithinBounds = function(pos) {
+        Bounds.prototype.clampWithinBounds = function(pos) {
             var zeroBased = pos.sub(this.start);
             var offset = this.end.sub(this.start);
             return this.start.add(clampVec(zeroBased,offset.x,offset.y));
@@ -1685,9 +1685,12 @@ function initLocker(container) {
     }
     
     allStickers.map(function(item) {
-        item = new Sticker(); // asdf
-        if(item.cost < globalStats.points)
+        item.graphic.x = item.graphic.y = 100;
+        item.graphic.scaleX = item.graphic.scaleY = 0.25;
+        item.graphic.regX = item.graphic.getBounds().width / 2;
+        item.graphic.regY = item.graphic.getBounds().height / 2;
         item.graphic.on("click",function() { StickerClicked(item.clone()); });
+        container.addChild(item.graphic);
     });
     
     GameStates.Locker.enable = function() {
@@ -1710,7 +1713,6 @@ function initLocker(container) {
                     var diff = pos.sub(item);
                     if(diff.lengthSquared() < 95*95) {
                         valid = false;
-                        console.log("redo");
                     }
                 });
                 copyXY(item.txt,pos);
@@ -1740,15 +1742,7 @@ function initLocker(container) {
         
     };
     
-    GameStates.Locker.mouseDownEvent = function(){ };
     
-    GameStates.Locker.mouseUpEvent = function(){ };
-    
-    GameStates.Locker.update = function() {
-        
     };
     
-    GameStates.Locker.disable = function() {
-        
-    };
 }
