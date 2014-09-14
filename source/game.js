@@ -1689,7 +1689,7 @@ function initLocker(container) {
             cloneOfSticker.graphic.scaleX = cloneOfSticker.graphic.scaleY = 0.25;
             container.addChild(cloneOfSticker.graphic); // required?
             //buying sticker
-            globalStats.points += cloneOfSticker.cost;
+            globalStats.points -= cloneOfSticker.cost;
             //randomly place locker
             cloneOfSticker.pos = myLocker.bounds.randomPointInside();
             copyXY(cloneOfSticker.graphic,cloneOfSticker.pos);
@@ -1706,6 +1706,7 @@ function initLocker(container) {
                 // add check for trash?
             });
             myLocker.myStickers.add(cloneOfSticker);
+            displayOfStats[4].txt.text = "Points: \n"  +  globalStats.points    +   " tests";
             store.update();
         }
     }
