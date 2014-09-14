@@ -634,6 +634,7 @@ var backgroundMusic = {
     //private
     _enabled: true,
     _src: null,
+    _lastStr: null,
     //public
     
     //allows audio to play
@@ -653,6 +654,7 @@ var backgroundMusic = {
     //changes audio, if existing audio is playing, it will be stopped
     //will only play if already enabled
     setSound: function(newGuy) {
+        this._lastStr = null;
         var temp = this._enabled;
         this.disable();
         this._src = newGuy;
@@ -660,9 +662,12 @@ var backgroundMusic = {
         if(temp) { this.enable(); }
     },
     setSoundFromString: function(audioKey, loop) {
-        var willLoop = loop ? {loop:-1} : null;
-        var audio = createjs.Sound.play(audioKey,willLoop);
-        this.setSound(audio);
+        if(this._lastStr !== audioKey) {
+            var willLoop = loop ? {loop:-1} : null;
+            var audio = createjs.Sound.play(audioKey,willLoop);
+            this.setSound(audio);
+            this._lastStr = audioKey;
+        }
     },
     //static functions
     isPaused: function(audio)    { return !audio.paused; },
@@ -676,6 +681,7 @@ var backgroundMusic = {
         this.disable();
         this._src = null;
         this._enabled = temp;
+        this._lastStr = null;;
     },
     
 };
@@ -960,7 +966,8 @@ function init() {
     //init start
     {
         GameStates.StartScreen.enable = function() {
-            backgroundMusic.setSoundFromString("StartScreen",true);
+            var musicIndex = Math.floor(globalStats.numOfQuestions() > 0 ? clamp((globalStats.cheatCount / globalStats.numOfQuestions())*moodyMusic.length,0,moodyMusic.length-1) : moodyMusic.length / 2);
+            backgroundMusic.setSoundFromString(moodyMusic[musicIndex],true);
         };
         var BTN = [];
         BTN.push(CreateButtonFromSprite(spriteSheets.makeButton(),"play",    function() { CurrentGameState = GameStates.Game;}));
@@ -1527,8 +1534,8 @@ function initGameScene(container) {
     }
     
     GameStates.Game.enable = function() {
+        onceShot = true;
         var musicIndex = Math.floor(globalStats.numOfQuestions() > 0 ? clamp((globalStats.cheatCount / globalStats.numOfQuestions())*moodyMusic.length,0,moodyMusic.length-1) : moodyMusic.length / 2);
-        
         backgroundMusic.setSoundFromString(moodyMusic[musicIndex],true);
         //generate test
         questions.currentQuestionIndex = 0;
