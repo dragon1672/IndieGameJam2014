@@ -588,6 +588,7 @@ var manifest = [
     {src:"audio/moralMathNegative2.wav", id:"Neg2"},
     {src:"audio/PencilsDownYoung.wav", id:"PencilsDown"},
     {src:"images/buttons.png", id:"button"},
+    {src:"images/wideStickyNote.png", id:"wideStickyNote"},
     {src:"images/miniButtons.png", id:"miniButton"},
     {src:"images/SpeakerOn.png", id:"SpeakerOn"},
     {src:"images/SpeakerOff.png", id:"SpeakerOff"},
@@ -1663,18 +1664,19 @@ function initLocker(container) {
     
     var homeButton = CreateButtonFromSprite(spriteSheets.makeButton(),"menu",function(){ CurrentGameState = GameStates.StartScreen; });
     container.addChild(homeButton);
-    homeButton.scaleY = homeButton.scaleX = 0.5;
+    homeButton.scaleY = homeButton.scaleX = 0.7;
     homeButton.x = homeButton.y = 40;
     homeButton.x += 30;
     
-    var statBackground = new createjs.Shape(new createjs.Graphics().beginFill("#0FF").drawRect(-5,-5,75,45));
+    var statBackground = loadImage("wideStickyNote");
+    statBackground.regX = statBackground.regY = 5;
     
     var displayOfStats = [
-    /* 0 */ { txt: new createjs.Text("","bold 16px Arial", "#FFF"), back: statBackground.clone() },
-    /* 1 */ { txt: new createjs.Text("","bold 16px Arial", "#FFF"), back: statBackground.clone() },
-    /* 2 */ { txt: new createjs.Text("","bold 16px Arial", "#FFF"), back: statBackground.clone() },
-    /* 3 */ { txt: new createjs.Text("","bold 16px Arial", "#FFF"), back: statBackground.clone() },
-    /* 4 */ { txt: new createjs.Text("","bold 16px Arial", "#FFF"), back: statBackground.clone() }
+    /* 0 */ { txt: new createjs.Text("","bold 16px Arial", "#000"), back: statBackground.clone() },
+    /* 1 */ { txt: new createjs.Text("","bold 16px Arial", "#000"), back: statBackground.clone() },
+    /* 2 */ { txt: new createjs.Text("","bold 16px Arial", "#000"), back: statBackground.clone() },
+    /* 3 */ { txt: new createjs.Text("","bold 16px Arial", "#000"), back: statBackground.clone() },
+    /* 4 */ { txt: new createjs.Text("","bold 16px Arial", "#000"), back: statBackground.clone() }
     ];
     displayOfStats.map(function(item) {
        container.addChild(item.back);
@@ -1818,7 +1820,7 @@ function initLocker(container) {
                     var start = new Vec2(200,500);
                     var padding = new Vec2((stage.canvas.width-start.x * 2) / this.elementsPerPage,0).mul(i);
                     copyXY(this.shapes.pool[i].img,start.add(padding));
-                    copyXY(this.shapes.pool[i].txt,start.add(padding).add(new Vec2(0,50)));
+                    copyXY(this.shapes.pool[i].txt,start.add(padding).add(new Vec2(-this.shapes.pool[i].txt.getBounds().width/2,50)));
                 } else {
                     if(this.shapes.pool[i].img !== null) this.shapes.pool[i].img.visible = false;
                     this.shapes.pool[i].txt.visible = false;
