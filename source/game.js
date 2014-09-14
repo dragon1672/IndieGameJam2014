@@ -1670,7 +1670,7 @@ function initLocker(container) {
             toAdd = new Sticker();
             toAdd.graphic = new loadImage("goodStick"+i);
             toAdd.cost = i*2 + 1;
-            toAdd.isUnlocked = testCount(i*3);
+            toAdd.isUnlocked = testCount(i);
 
             allStickers.push(toAdd);
         }
