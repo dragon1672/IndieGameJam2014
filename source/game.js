@@ -811,6 +811,7 @@ function initSprites() {
 //endregion
 
 //region init
+//region init
 //region global assets (mouse and keys)
     var mouse = {
         pos: new Coord(),
@@ -1369,37 +1370,6 @@ var moodyMusic = [
 ];
 
 function initGameScene(container) {
-    //region init stickers
-    (function(){
-        var i, toAdd;
-        function cheatCount(level) {
-            return function(stat) {return stat.cheatCount >= level;};
-        }
-        function testCount(level) {
-            return function(stat) {return stat.numOfTests >= level;};
-        }
-        //bad
-        for(i = 0; i<9;i++) {
-            toAdd = new Sticker();
-            toAdd.graphic = new loadImage("badStick"+i);
-            toAdd.cost = i*2;
-            toAdd.isUnlocked = cheatCount(i/2);
-
-            allStickers.push(toAdd);
-        }
-        //good
-        for(i = 0; i<16;i++) {
-            toAdd = new Sticker();
-            toAdd.graphic = new loadImage("goodStick"+i);
-            toAdd.cost = i*2;
-            toAdd.isUnlocked = testCount(i/2);
-
-            allStickers.push(toAdd);
-        }
-    }());
-    //endregion
-    
-    
     var screenCover = new createjs.Shape();
     screenCover.graphics.beginFill("#000").drawRect(0, 0, stage.canvas.width, stage.canvas.height);
     screenCover.alpha = 0;
@@ -1642,11 +1612,70 @@ function copyXY(to,from) {
 
 
 function initLocker(container) {
+    //init stickers
+    (function(){
+        var i, toAdd;
+        function cheatCount(level) {
+            return function(stat) {return stat.cheatCount >= level;};
+        }
+        function testCount(level) {
+            return function(stat) {return stat.numOfTests >= level;};
+        }
+        //bad
+        for(i = 0; i<9;i++) {
+            toAdd = new Sticker();
+            toAdd.graphic = new loadImage("badStick"+i);
+            toAdd.cost = i*2;
+            toAdd.isUnlocked = cheatCount(i/2);
+
+            allStickers.push(toAdd);
+        }
+        //good
+        for(i = 0; i<16;i++) {
+            toAdd = new Sticker();
+            toAdd.graphic = new loadImage("goodStick"+i);
+            toAdd.cost = i*2;
+            toAdd.isUnlocked = testCount(i/2);
+
+            allStickers.push(toAdd);
+        }
+    }());
     var validStickers = new HashSet();
     var newStickers = new HashSet();
     
+    var homeButton = CreateButtonFromSprite(spriteSheets.makeButton(),"menu",function(){ CurrentGameState = GameStates.StartScreen; });
+    container.addChild(homeButton);
+    homeButton.scaleY = homeButton.scaleX = 0.5;
+    homeButton.x = homeButton.y = 40;
+    homeButton.x += 30;
+    
+    var statBackground = new createjs.Shape(new createjs.Graphics().beginFill("#0FF").drawRect(0,0,70,70));
+    
+    var displayOfStats = [
+        { txt: new createjs.Text("Cheated "     +     globalStats.cheatCount  + " times","bold italic 35px Rage", "#999"), back: statBackground.clone() },
+        { txt: new createjs.Text("Caught cheating " + globalStats.timesCaught + " times","bold italic 35px Rage", "#999"), back: statBackground.clone() },
+        { txt: new createjs.Text("Grade: "      +     globalStats.grade().letter,        "bold italic 35px Rage", "#999"), back: statBackground.clone() },
+        { txt: new createjs.Text("Taken: "      +     globalStats.numOfTests  + " tests","bold italic 35px Rage", "#999"), back: statBackground.clone() },
+        { txt: new createjs.Text("Total Points: "  +  globalStats.points    +   " tests","bold italic 35px Rage", "#999"), back: statBackground.clone() },
+    ];
+    
+    function statDisplay(title,data, x,y) {
+        this.title = title;
+        this.data  = data;
+        this.backgroundGraphic = new createjs.Shape();
+        this.text = new createjs.Text(title+"\n"+data,"bold italic 35px Rage", "#999");
+        
+        var pos = new Vec2(x,y);
+        copyXY(this.backgroundGraphic,pos);
+        copyXY(this.text,pos);
+        
+        container.addChild(this.backgroundGraphic);
+        container.addChild(this.text);
+    }
+    
     function StickerClicked(cloneOfSticker) {
         if(globalStats.points >= cloneOfSticker.cost) {
+            container.addChild(cloneOfSticker); // required?
             //buying sticker
             globalStats.points += cloneOfSticker.cost;
             //randomly place locker
