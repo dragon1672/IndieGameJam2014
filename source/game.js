@@ -1751,6 +1751,42 @@ function initLocker(container) {
     };
     
     
+    var store = {
+        currentPage: 0,
+        elementsPerPage: 3,
+        padding: new Vec2(30,0),
+        shapes: {
+            btnL: null,
+            btnR: null,
+            pool: (function(){
+                var ret = [];
+                for(var i=0;i<3;i++) {
+                    ret.push({img: null, txt: new createjs.Text("","bold 16px Arial", "#FFF")});
+                }
+            }())
+        },
+        update: function() {
+            this.shapes.btnL.visible = this.currentPage > 0;
+            this.shapes.btnR.visible = (this.currentPage+1)*this.elementsPerPage < validStickers.size();
+            var masterList = [];
+            validStickers.map(function(item) {
+                item.graphic.visible = false;
+                masterList.push(item);
+            });
+            for(var i=0;i<this.elementsPerPage;i++) {
+                var index = this.currentPage * this.elementsPerPage + i;
+                if(index < masterList.length) {
+                    
+                } else {
+                    this.shapes.pool[i].txt.visible = false;
+                }
+            }
+        },
     };
+    
+    
+    
+    
+    
     
 }
